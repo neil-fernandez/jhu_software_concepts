@@ -1,27 +1,30 @@
+<!-- This is the html child template for the contact page-->
+
+{% extends 'base.html' %} <!-- Connect child with parent template -->
+
+<!-- Connect child with parent block using block's name header -->
+{% block header %}
+<!-- Navigation bar with currently active selection -->
 <nav class="navbar">
   <div class="nav-container">
     <ul class="nav-menu">
       <li><a href="{{ url_for('views.home') }}">Home</a></li>
-      <li><a href="{{ url_for('views.contact') }}" class="active">Contact</a></li>
       <li><a href="{{ url_for('views.projects') }}">Projects</a></li>
+      <li><a href="{{ url_for('views.contact') }}" class="active">Contact</a></li>
     </ul>
   </div>
 </nav>
-
-{% extends 'base.html' %} <!-- connect child with parent template -->
-
- <!-- connect child with parent block using block's name header -->
-{% block header %}
-  <h1>{% block title %}{% endblock title %}</h1>
-<!-- add page's title inside header block and wrap in title -->
 {% endblock header %}
 
+ <!-- Connect child with parent block using block's name content -->
 {% block content %}
+ <!-- Reuse css class 'bio' etc. for consistent formatting of contact details -->
 <section class="bio">
   <div class="bio-container">
     <div class="bio-text">
-      <p>Contact me via email: nfern2@gmail.com</p>
-      <p>Contact me via LinkedIn: </p>
+      <h1>Contact</h1>
+      <p><strong>Contact me via email:</strong> <a href="mailto:nfern2@gmail.com" class="email-link">nfern2@gmail.com</a></p>
+      <p><strong>Contact me via LinkedIn:</strong> <a href="https://www.linkedin.com/in/nkfernandez/" target="_blank" rel="noopener noreferrer">nkfernandez</a></p>
     </div>
 </section>
 {% endblock content %}

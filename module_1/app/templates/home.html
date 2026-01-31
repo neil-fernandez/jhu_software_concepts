@@ -1,53 +1,51 @@
+<!-- This is the html child template for the home page-->
+
+{% extends "base.html" %} <!-- Connect child with parent template -->
+
+<!-- Connect child with parent block using block's name header -->
+{% block header %}
+<!-- Navigation bar with currently active selection -->
 <nav class="navbar">
   <div class="nav-container">
     <ul class="nav-menu">
       <li><a href="{{ url_for('views.home') }}" class="active">Home</a></li>
-      <li><a href="{{ url_for('views.contact') }}">Contact</a></li>
       <li><a href="{{ url_for('views.projects') }}">Projects</a></li>
+      <li><a href="{{ url_for('views.contact') }}">Contact</a></li>
     </ul>
   </div>
 </nav>
-
-{% extends "base.html" %} <!-- connect child with parent template -->
-
-{% block header %} <!-- connect child with parent block using block's name header -->
-  <h1>{% block title %}{% endblock title %}</h1>
-<!-- add page's title inside header block and wrap in title -->
 {% endblock header %}
 
- <!-- connect child with parent block using block's name content -->
+ <!-- Connect child with parent block using block's name content -->
 {% block content %}
 <section class="bio">
+  <!-- Display bio text -->
   <div class="bio-container">
     <div class="bio-text">
       <h1>Neil Fernandez</h1>
       <h2>Engineer</h2>
       <p>
-        Write your bio here. This is a short introduction about who you are,
-        what you do, and what you’re interested in. Keep it concise but
-        personable.
+        Hi there!
       </p>
        <p>
-        Write your bio here. This is a short introduction about who you are,
-        what you do, and what you’re interested in. Keep it concise but
-        personable.
+        My name is Neil Fernandez and I am an Engineer working in banking,
+           specialising in process automation and analytics.
       </p>
        <p>
-        Write your bio here. This is a short introduction about who you are,
-        what you do, and what you’re interested in. Keep it concise but
-        personable.
+        I hold a bachelor's honors degree in electrical and computer
+           systems engineering and have a passion for robotics. I also
+           teach mathematics and physics outide of my profession.
       </p>
        <p>
-        Write your bio here. This is a short introduction about who you are,
-        what you do, and what you’re interested in. Keep it concise but
-        personable.
+        I love the being in the outdoors and working with animals.
+           I volunteer with a local wildlife not for profit
+           to transport and care for sick and injured native wildlife.
       </p>
     </div>
-    <!-- Image -->
+    <!-- Display image -->
     <div class="bio-image">
       <img src="{{ url_for('static', filename='me.jpg') }}" alt="Photo of me and the dogs"/>
     </div>
   </div>
  </section>
-<!-- url_for() create full URL to given view automatically -->
 {% endblock content %}

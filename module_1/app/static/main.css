@@ -1,77 +1,19 @@
+/* These are the css classes to style the web application  */
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-body {
-  font-family: sans-serif;
-  font-size: 1.05rem;
-  line-height: 1.6;
-  margin-bottom: 1rem;
-  text-align: left;
-}
-
-/* Main layout */
-.bio-container {
-  max-width: 1100px;
-  margin: 0 auto;
-
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 3rem;
-}
-
-/* Text side */
-.bio-text {
-  flex: 1;
-  padding-left: 10px;
-  padding-top: 10px;
-}
-
-.bio-text h1 {
-  font-size: 2.25rem;
-  margin-bottom: 1rem;
-}
-
-.bio-text h2 {
-  font-size: 1.75rem;
-  margin-bottom: 1rem;
-}
-
-.bio-text p {
-  font-size: 1.05rem;
-  line-height: 1.6;
-  margin-bottom: 1rem;
-}
-
-/* Image side */
-.bio-image {
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
-  padding-right: 10px;
-  padding-top: 10px;
-}
-
-.bio img {
-  max-width: 100%;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  width: 500px;
-  height: 500px;
-}
-
-/* Navbar container */
+/* Navbar */
 .navbar {
   width: 100%;
-  background-color: #0f172a; /* dark navy */
+  background-color: #0f172a;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
-/* Inner layout */
+/* Navbar inner container */
 .nav-container {
   max-width: 1600px;
   margin: 0 auto;
@@ -81,23 +23,16 @@ body {
   justify-content: flex-end;
 }
 
-/* Navbar */
-.navbar {
-  width: 100%;
-  background-color: #0f172a; /* dark navy */
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-}
-
-/* Remove bullets + horizontal layout */
+/* Nav list container <ul> */
 .nav-menu {
   list-style: none;
   display: flex;
   gap: 1rem;
 }
 
-/* Nav links */
+/* Nav list <li> link */
 .nav-menu li a {
-  display: block;                 /* makes padding clickable */
+  display: block;
   color: #e5e7eb;
   text-decoration: none;
   padding: 0.5rem 1rem;
@@ -109,13 +44,79 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Hover */
+/* Nav list <li> link hover */
 .nav-menu li a:hover {
   background-color: #2563eb;
   color: #ffffff;
 }
 
+/* Nav list <li> link active */
 .nav-menu a.active {
   background-color: #1d4ed8;
   color: #ffffff;
+}
+
+/* Body content */
+body {
+  font-family: sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+/* Text and image wrapper */
+.bio-container {
+  max-width: 1100px;
+  margin: 0 auto;
+
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 3rem;
+}
+
+/* Text container */
+.bio-text {
+  flex: 1;
+  padding-left: 10px;
+  padding-top: 10px;
+}
+
+/* Header 1 */
+.bio-text h1 {
+  font-size: 2.25rem;
+  margin-bottom: 1rem;
+}
+
+/* Header 2 */
+.bio-text h2 {
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+}
+
+/* Paragraph */
+.bio-text p {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+/* Image container */
+.bio-image {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 10px;
+  padding-top: 10px;
+}
+
+/* Image */
+.bio img {
+  max-width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  width: 500px;
+  height: 500px;
 }

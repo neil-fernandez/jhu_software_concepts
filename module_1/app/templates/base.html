@@ -1,18 +1,21 @@
+<!-- This is the html base template to render child blocks-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Welcome to Neil Fernandez's Project Portfolio</title>
-    <link href="{{ url_for('static', filename='main.css') }}" rel="stylesheet">
+    <title>Neil Fernandez's Personal Website</title>
+    <!--Declare style sheet from static URL-->
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
 </head>
 <body>
     <section>
         <header>
-             <!--Extend with child templates-->
+             <!--Extend with child template header-->
             {% block header %}{% endblock header %}
         </header>
         <main>
-             <!--Display hint or child template-->
+             <!--Display hint or extend with child template block-->
             {% block content %}<p>No templates to render.</p>{% endblock content %}
         </main>
     </section>

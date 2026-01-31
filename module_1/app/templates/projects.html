@@ -1,29 +1,35 @@
+<!-- This is the html child template for the projects page-->
+
+{% extends 'base.html' %} <!-- Connect child with parent template -->
+
+<!-- Connect child with parent block using block's name header -->
+{% block header %}
+<!-- Navigation bar with currently active selection -->
 <nav class="navbar">
   <div class="nav-container">
     <ul class="nav-menu">
       <li><a href="{{ url_for('views.home') }}">Home</a></li>
-      <li><a href="{{ url_for('views.contact') }}">Contact</a></li>
       <li><a href="{{ url_for('views.projects') }}" class="active">Projects</a></li>
+      <li><a href="{{ url_for('views.contact') }}">Contact</a></li>
     </ul>
   </div>
 </nav>
-
-{% extends 'base.html' %} <!-- connect child with parent template -->
-
-{% block header %} <!-- connect child with parent block using block's name header -->
-  <h1>{% block title %}{% endblock title %}</h1>
-<!-- add page's title inside header block and wrap in title -->
 {% endblock header %}
 
+ <!-- Connect child with parent block using block's name content -->
 {% block content %}
+ <!-- Reuse css class 'bio' etc. for consistent formatting of project details -->
 <section class="bio">
   <div class="bio-container">
     <div class="bio-text">
       <h1>Projects</h1>
-      <h2>Module 1</h2>
-      <p>Project Title:</p>
-      <p>Project Details</p>
-      <p>Project GitHub Link:</p>
+      <h2>Module 1: Create a Flask Web App</h2>
+      <p><strong>Project Title:</strong> Flask Personal Web Application</p>
+      <p><strong>Project Details:</strong> This project involved creating a personal web application
+         using Flask as a landing page for my bio, contact details, and project details.
+      </p>
+      <p><strong>Project GitHub Link:</strong> <a href="https://github.com/neil-fernandez/jhu_software_concepts/tree/main/module_1" target="_blank" rel="noopener noreferrer">module 1</a></p>
+
     </div>
 </section>
 {% endblock content %}
