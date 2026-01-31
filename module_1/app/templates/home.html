@@ -1,14 +1,53 @@
+<nav class="navbar">
+  <div class="nav-container">
+    <ul class="nav-menu">
+      <li><a href="{{ url_for('views.home') }}" class="active">Home</a></li>
+      <li><a href="{{ url_for('views.contact') }}">Contact</a></li>
+      <li><a href="{{ url_for('views.projects') }}">Projects</a></li>
+    </ul>
+  </div>
+</nav>
+
 {% extends "base.html" %} <!-- connect child with parent template -->
 
 {% block header %} <!-- connect child with parent block using block's name header -->
-  <h2>{% block title %}Home{% endblock title %}</h2>
-  <!-- add page's title inside header block and wrap in title -->
+  <h1>{% block title %}{% endblock title %}</h1>
+<!-- add page's title inside header block and wrap in title -->
 {% endblock header %}
 
-{% block content %} <!-- connect child with parent block using block's name content -->
-  <p>
-    <img src="{{ url_for('static', filename='me.jpg') }}" align="middle" style="width:150px;height:150px"/>
-    You can contact me by visiting<a href="{{ url_for('views.contact') }}">Contact</a>.
-      <!-- url_for() create full URL to given view automatically -->
-  </p>
+ <!-- connect child with parent block using block's name content -->
+{% block content %}
+<section class="bio">
+  <div class="bio-container">
+    <div class="bio-text">
+      <h1>Neil Fernandez</h1>
+      <h2>Engineer</h2>
+      <p>
+        Write your bio here. This is a short introduction about who you are,
+        what you do, and what you’re interested in. Keep it concise but
+        personable.
+      </p>
+       <p>
+        Write your bio here. This is a short introduction about who you are,
+        what you do, and what you’re interested in. Keep it concise but
+        personable.
+      </p>
+       <p>
+        Write your bio here. This is a short introduction about who you are,
+        what you do, and what you’re interested in. Keep it concise but
+        personable.
+      </p>
+       <p>
+        Write your bio here. This is a short introduction about who you are,
+        what you do, and what you’re interested in. Keep it concise but
+        personable.
+      </p>
+    </div>
+    <!-- Image -->
+    <div class="bio-image">
+      <img src="{{ url_for('static', filename='me.jpg') }}" alt="Photo of me and the dogs"/>
+    </div>
+  </div>
+ </section>
+<!-- url_for() create full URL to given view automatically -->
 {% endblock content %}

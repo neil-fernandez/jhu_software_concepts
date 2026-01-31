@@ -1,9 +1,29 @@
-{% extends 'base.html' %}
+<nav class="navbar">
+  <div class="nav-container">
+    <ul class="nav-menu">
+      <li><a href="{{ url_for('views.home') }}">Home</a></li>
+      <li><a href="{{ url_for('views.contact') }}">Contact</a></li>
+      <li><a href="{{ url_for('views.projects') }}" class="active">Projects</a></li>
+    </ul>
+  </div>
+</nav>
 
-{% block header %}
-  <h2>{% block title %}Projects{% endblock title %}</h2>
+{% extends 'base.html' %} <!-- connect child with parent template -->
+
+{% block header %} <!-- connect child with parent block using block's name header -->
+  <h1>{% block title %}{% endblock title %}</h1>
+<!-- add page's title inside header block and wrap in title -->
 {% endblock header %}
 
 {% block content %}
-  <p>Project listing</p>
+<section class="bio">
+  <div class="bio-container">
+    <div class="bio-text">
+      <h1>Projects</h1>
+      <h2>Module 1</h2>
+      <p>Project Title:</p>
+      <p>Project Details</p>
+      <p>Project GitHub Link:</p>
+    </div>
+</section>
 {% endblock content %}

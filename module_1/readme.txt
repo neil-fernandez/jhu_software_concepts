@@ -5,7 +5,7 @@ Module Info: Module 1 Assignment: Personal Website is Due on
 
 run.py - TBC
 
-pages.py - TBC
+views.py - TBC
 
 requirements.txt - TBC
 

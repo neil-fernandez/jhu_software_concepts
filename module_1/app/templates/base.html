@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title>Welcome to Neil Fernandez's Project Portfolio</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <link href="{{ url_for('static', filename='main.css') }}" rel="stylesheet">
 </head>
 <body>
-<h1>Welcome</h1>
-{% include("_navigation.html") %}
     <section>
         <header>
-            {% block header %}{% endblock header %} <!--Extend with child templates-->
+             <!--Extend with child templates-->
+            {% block header %}{% endblock header %}
         </header>
         <main>
-            {% block content %}<p>No messages.</p>{% endblock content %} <!--Display hint or child templates-->
+             <!--Display hint or child template-->
+            {% block content %}<p>No templates to render.</p>{% endblock content %}
         </main>
     </section>
 </body>
