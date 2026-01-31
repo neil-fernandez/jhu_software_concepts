@@ -1,0 +1,14 @@
+{% extends "base.html" %} <!-- connect child with parent template -->
+
+{% block header %} <!-- connect child with parent block using block's name header -->
+  <h2>{% block title %}Home{% endblock title %}</h2>
+  <!-- add page's title inside header block and wrap in title -->
+{% endblock header %}
+
+{% block content %} <!-- connect child with parent block using block's name content -->
+  <p>
+    <img src="{{ url_for('static', filename='me.jpg') }}" align="middle" style="width:150px;height:150px"/>
+    You can contact me by visiting<a href="{{ url_for('views.contact') }}">Contact</a>.
+      <!-- url_for() create full URL to given view automatically -->
+  </p>
+{% endblock content %}
