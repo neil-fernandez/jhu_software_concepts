@@ -1,5 +1,5 @@
 """
-This module contains functions scrape_data and save_data
+This module contains functions scrape_data, save_data, and load_data
 which are used to respectively perform web scraping of
 student data and saving the cleaned output in JSON format
 """

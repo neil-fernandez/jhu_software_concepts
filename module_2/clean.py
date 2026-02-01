@@ -7,6 +7,8 @@ load the saved JSON file
 
 import re
 
+import json
+
 from bs4 import BeautifulSoup
 
 
@@ -180,3 +182,16 @@ def clean_data(html):
         last_row = results[-1]
 
     return results
+
+def load_data(path):
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            rows = json.load(f)
+    except FileNotFoundError:
+        print(f"File not found: {path}")
+        return []
+    if not rows:
+        print("No data loaded")
+        return []
+    print(f"Loaded {len(rows)} rows from {path}")
+    return rows
