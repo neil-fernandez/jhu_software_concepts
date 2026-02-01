@@ -1,3 +1,10 @@
+"""
+This module contains functions clean_data and load_data
+which are used to perform a first pass of cleaning scraped data
+using regex, beautifulsoup and string expressions and then
+load the saved JSON file
+"""
+
 import re
 
 from bs4 import BeautifulSoup
@@ -36,7 +43,8 @@ def clean_data(html):
             date_set = False
             for badge in badge_texts:
                 status_date_match = re.search(
-                    r"\b(Accepted|Rejected|Interview|Wait\s*listed)\b(?:\s+on)?\s+([0-9]{1,2}\s+[A-Za-z]{3,9}(?:\s+\d{4})?)\b",
+                    r"\b(Accepted|Rejected|Interview|Wait\s*listed)\b(?:\s+on)?"
+                    r"\s+([0-9]{1,2}\s+[A-Za-z]{3,9}(?:\s+\d{4})?)\b",
                     badge,
                     re.IGNORECASE,
                 )
@@ -59,7 +67,8 @@ def clean_data(html):
             # fallback: search status date from row text
             if not date_set:
                 status_date_match = re.search(
-                    r"\b(?:Accepted|Rejected|Interview|Wait\s*listed)\b(?:\s+on)?\s+([0-9]{1,2}\s+[A-Za-z]{3,9}(?:\s+\d{4})?)\b",
+                    r"\b(?:Accepted|Rejected|Interview|Wait\s*listed)\b(?:\s+on)?"
+                    r"\s+([0-9]{1,2}\s+[A-Za-z]{3,9}(?:\s+\d{4})?)\b",
                     row_text,
                     re.IGNORECASE,
                 )
