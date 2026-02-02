@@ -51,7 +51,8 @@ Project Files and Descriptions:
 
    applicant_data.json - contains the generated clean.py JSON file output with 40000 records.
    applicant_data.json.jsonl - contains LLM JSON Lines output with 4799 records (run with restricted compute).
-   out.json - contains the LLM JSON output with 4799 records (run with restricted compute).
+   out.json - contains the cleaned LLM JSON output with 4799 records (run with restricted compute).
+   llm_extend_applicant_data.json - contains a copy of the cleaned LLM JSON output per assignment instructions.
 
    applicant_data_small.json - contains the generated clean.py JSON file output with 60 records (for testing).
    applicant_data_small.json.jsonl - contains LLM JSON Lines output with 60 records (for testing).
