@@ -8,6 +8,8 @@ import os
 import re
 import sys
 import difflib
+import time
+import multiprocessing as mp
 from typing import Any, Dict, List, Tuple
 
 from flask import Flask, jsonify, request
@@ -15,6 +17,10 @@ from huggingface_hub import hf_hub_download
 from llama_cpp import Llama  # CPU-only by default if N_GPU_LAYERS=0
 
 app = Flask(__name__)
+
+# Ensure Unicode can be written to stdout on Windows terminals.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 # ---------------- Model config ----------------
 MODEL_REPO = os.getenv(
@@ -67,6 +73,22 @@ COMMON_PROG_FIXES: Dict[str, str] = {
     "Info Studies": "Information Studies",
 }
 
+# ---------------- Degree level extraction ----------------
+DEGREE_PATTERNS: List[Tuple[str, str]] = [
+    (r"(?i)\b(ph\.?d|d\.?phil|doctorate|doctoral)\b", "PhD"),
+    (r"(?i)\b(masters|master's|msc|m\.?sc|ms|m\.?s|meng|m\.?eng|mba|mph|mpp|mpa|med|mse|mcs)\b", "Masters"),
+    (r"(?i)\b(bachelors|bachelor's|ba|b\.?a|bs|b\.?s|beng|b\.?eng)\b", "Bachelors"),
+]
+
+
+def _extract_degree_level(text: str) -> str:
+    """Extract degree level from the raw program text."""
+    t = text or ""
+    for pattern, label in DEGREE_PATTERNS:
+        if re.search(pattern, t):
+            return label
+    return ""
+
 # ---------------- Few-shot prompt ----------------
 SYSTEM_PROMPT = (
     "You are a data cleaning assistant. Standardize degree program and university "
@@ -81,7 +103,7 @@ SYSTEM_PROMPT = (
     "- Use Title Case for program; use official capitalization for university "
     "names (e.g., \"University of X\").\n"
     '- Ensure correct spelling (e.g., "McGill", not "McGiill").\n'
-    '- If university cannot be inferred, return "Unknown".\n\n'
+    "- If university cannot be inferred, return an empty string.\n\n"
     "Return JSON ONLY with keys:\n"
     "  standardized_program, standardized_university\n"
 )
@@ -158,7 +180,7 @@ def _split_fallback(text: str) -> Tuple[str, str]:
     if uni:
         uni = re.sub(r"\bOf\b", "of", uni.title())
     else:
-        uni = "Unknown"
+        uni = ""
     return prog, uni
 
 
@@ -173,6 +195,10 @@ def _best_match(name: str, candidates: List[str], cutoff: float = 0.86) -> str |
 def _post_normalize_program(prog: str) -> str:
     """Apply common fixes, title case, then canonical/fuzzy mapping."""
     p = (prog or "").strip()
+    # Remove degree-level tokens from program names.
+    for pattern, _label in DEGREE_PATTERNS:
+        p = re.sub(pattern, "", p)
+    p = re.sub(r"\s+", " ", p).strip(" ,-/")
     p = COMMON_PROG_FIXES.get(p, p)
     p = p.title()
     if p in CANON_PROGS:
@@ -202,7 +228,7 @@ def _post_normalize_university(uni: str) -> str:
     if u in CANON_UNIS:
         return u
     match = _best_match(u, CANON_UNIS, cutoff=0.86)
-    return match or u or "Unknown"
+    return match or u or ""
 
 
 def _call_llm(program_text: str) -> Dict[str, str]:
@@ -251,6 +277,20 @@ def _call_llm(program_text: str) -> Dict[str, str]:
     }
 
 
+def _process_row(row: Dict[str, Any]) -> Dict[str, Any]:
+    """Process a single row (safe for multiprocessing)."""
+    program_text = (row or {}).get("program") or ""
+    result = _call_llm(program_text)
+    row["llm-generated-program"] = result["standardized_program"]
+    uni_text = (row or {}).get("university") or ""
+    if uni_text:
+        row["llm-generated-university"] = _post_normalize_university(uni_text)
+    else:
+        row["llm-generated-university"] = result["standardized_university"]
+    row["degree_level"] = _extract_degree_level(program_text)
+    return row
+
+
 def _normalize_input(payload: Any) -> List[Dict[str, Any]]:
     """Accept either a list of rows or {'rows': [...]}."""
     if isinstance(payload, list):
@@ -277,7 +317,12 @@ def standardize() -> Any:
         program_text = (row or {}).get("program") or ""
         result = _call_llm(program_text)
         row["llm-generated-program"] = result["standardized_program"]
-        row["llm-generated-university"] = result["standardized_university"]
+        uni_text = (row or {}).get("university") or ""
+        if uni_text:
+            row["llm-generated-university"] = _post_normalize_university(uni_text)
+        else:
+            row["llm-generated-university"] = result["standardized_university"]
+        row["degree_level"] = _extract_degree_level(program_text)
         out.append(row)
 
     return jsonify({"rows": out})
@@ -292,6 +337,10 @@ def _cli_process_file(
     """Process a JSON file and write JSONL incrementally."""
     with open(in_path, "r", encoding="utf-8") as f:
         rows = _normalize_input(json.load(f))
+    total = len(rows)
+    progress_every = int(os.getenv("PROGRESS_EVERY", "100"))
+    start_time = time.time()
+    n_workers = int(os.getenv("N_WORKERS", "1"))
 
     sink = sys.stdout if to_stdout else None
     if not to_stdout:
@@ -302,15 +351,36 @@ def _cli_process_file(
     assert sink is not None  # for type-checkers
 
     try:
-        for row in rows:
-            program_text = (row or {}).get("program") or ""
-            result = _call_llm(program_text)
-            row["llm-generated-program"] = result["standardized_program"]
-            row["llm-generated-university"] = result["standardized_university"]
+        if n_workers > 1:
+            ctx = mp.get_context("spawn")
+            with ctx.Pool(processes=n_workers) as pool:
+                for idx, row in enumerate(pool.imap(_process_row, rows, chunksize=1), start=1):
+                    json.dump(row, sink, ensure_ascii=False)
+                    sink.write("\n")
+                    sink.flush()
+                    if progress_every > 0 and (idx == 1 or idx % progress_every == 0 or idx == total):
+                        elapsed = time.time() - start_time
+                        rate = idx / elapsed if elapsed > 0 else 0.0
+                        remaining = (total - idx) / rate if rate > 0 else 0.0
+                        print(
+                            f"[{idx}/{total}] {rate:.2f} rows/s, ETA {remaining/60:.1f} min",
+                            file=sys.stderr,
+                        )
+        else:
+            for idx, row in enumerate(rows, start=1):
+                row = _process_row(row)
 
-            json.dump(row, sink, ensure_ascii=False)
-            sink.write("\n")
-            sink.flush()
+                json.dump(row, sink, ensure_ascii=False)
+                sink.write("\n")
+                sink.flush()
+                if progress_every > 0 and (idx == 1 or idx % progress_every == 0 or idx == total):
+                    elapsed = time.time() - start_time
+                    rate = idx / elapsed if elapsed > 0 else 0.0
+                    remaining = (total - idx) / rate if rate > 0 else 0.0
+                    print(
+                        f"[{idx}/{total}] {rate:.2f} rows/s, ETA {remaining/60:.1f} min",
+                        file=sys.stderr,
+                    )
     finally:
         if sink is not sys.stdout:
             sink.close()
@@ -348,6 +418,16 @@ if __name__ == "__main__":
         action="store_true",
         help="Write JSON Lines to stdout instead of a file.",
     )
+    parser.add_argument(
+        "--json-array",
+        action="store_true",
+        help="Post-process JSONL output into a JSON array file.",
+    )
+    parser.add_argument(
+        "--json-array-out",
+        default=None,
+        help="Path for the JSON array output (defaults to the JSONL output path).",
+    )
     args = parser.parse_args()
 
     if args.serve or args.file is None:
@@ -360,3 +440,34 @@ if __name__ == "__main__":
             append=bool(args.append),
             to_stdout=bool(args.stdout),
         )
+        if not args.stdout and not sys.stdout.isatty():
+            jsonl_path = args.out or (args.file + ".jsonl")
+            rows_list: List[Dict[str, Any]] = []
+            with open(jsonl_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        rows_list.append(json.loads(line))
+            json.dump(rows_list, sys.stdout, ensure_ascii=False, indent=2)
+            sys.stdout.write("\n")
+        if args.json_array and not args.stdout:
+            if args.out and args.out.lower().endswith(".json"):
+                jsonl_path = args.out + "l"
+                array_out = args.json_array_out or args.out
+            elif args.out and args.out.lower().endswith(".jsonl"):
+                jsonl_path = args.out
+                array_out = args.json_array_out or args.out[:-1]
+            else:
+                jsonl_path = args.out or (args.file + ".jsonl")
+                if jsonl_path.lower().endswith(".jsonl"):
+                    array_out = args.json_array_out or jsonl_path[:-1]
+                else:
+                    array_out = args.json_array_out or (jsonl_path + ".json")
+            rows_list: List[Dict[str, Any]] = []
+            with open(jsonl_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        rows_list.append(json.loads(line))
+            with open(array_out, "w", encoding="utf-8") as f:
+                json.dump(rows_list, f, ensure_ascii=False, indent=2)

@@ -28,7 +28,7 @@ if __name__ == "__main__":
         print("Crawler access allowed")
 
         # if crawler access is allowed, then scrape data
-        parsed_data = scrape_data(url, max_pages=2000)
+        parsed_data = scrape_data(url, max_pages=20000)
 
         # save scraped data as JSON
         save_data("applicant_data.json", parsed_data)
