@@ -1,7 +1,8 @@
 """
 This Python script is used to start a local web application
-built using Flask to display query data, scrape and load new records
-into a postgresql database and update query analysis as required.
+built using Flask to load the llm output, display query results,
+scrape and load new records into a postgresql database and update
+query analysis as required.
 """
 
 import load_data as ld
@@ -61,7 +62,7 @@ def pull_data():
     # scrape data from grad cafe up to max_pages
     rows = sd.scrape_data(
         "https://www.thegradcafe.com/survey/",
-        max_pages=15,
+        max_pages=5,
     )
 
     # save data to new_only.json

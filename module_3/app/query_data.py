@@ -2,7 +2,7 @@
 This module contains declarations for all the sql queries,
 the structured output to render on the website and to output
 to console, and it contains a main declaration to run the
-script directly or testing purposes.
+script directly for testing purposes.
 """
 
 import psycopg
