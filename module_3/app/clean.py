@@ -1,8 +1,7 @@
 """
-This module contains functions clean_data and load_data
-which are used to perform a first pass of cleaning scraped data
-using regex, beautifulsoup and string expressions and then
-load the saved JSON file
+This module contains functions clean_data which is used to
+clean scraped data using regex, beautifulsoup and string
+expressions.
 """
 
 import re

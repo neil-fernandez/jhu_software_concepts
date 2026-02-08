@@ -61,7 +61,7 @@ def pull_data():
     # scrape data from grad cafe up to max_pages
     rows = sd.scrape_data(
         "https://www.thegradcafe.com/survey/",
-        max_pages=5,
+        max_pages=15,
     )
 
     # save data to new_only.json

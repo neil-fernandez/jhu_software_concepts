@@ -11,6 +11,7 @@
 <body>
     <nav class="nav">
         <a href="{{ url_for('index') }}">Grad School Cafe Data Analysis</a>
+        <!--Nav bar with Pull Data and Update Analysis buttons-->
         <div class="nav-actions">
             <form action="{{ url_for('pull_data') }}" method="post">
                 <button class="nav-button" type="submit"
