@@ -1,3 +1,9 @@
+"""
+This module contains functions to load a json file into the database
+schema (load), clean null bytes (clean_text), and parse floats to enable
+load using the correct data type (parse_number).
+"""
+
 import json
 import re
 import psycopg
@@ -16,38 +22,32 @@ def parse_number(value):
     return float(match.group(0)) if match else None
 
 # open and load json file into db schema
-def load():
-    # open json file and create list of non-blank entries
-    records = []
-    with open("llm_extend_applicant_data.json", encoding="utf-8") as handle:
-        for line in handle:
-            line = line.strip()
-            if not line:
-                continue
-            records.append(json.loads(line))
+def load(sourcefile, reset=False):
 
-    # clean data for load into db and create list of tuples
-    rows = []
-    for idx, record in enumerate(records, start=1):
-        rows.append(
-            (
-                idx,
-                clean_text(record.get("program")),
-                clean_text(record.get("comments")),
-                clean_text(record.get("date_added")),
-                clean_text(record.get("url")),
-                clean_text(record.get("applicant_status")),
-                clean_text(record.get("semester_year_start")),
-                clean_text(record.get("citizenship")),
-                parse_number(record.get("gpa")),
-                parse_number(record.get("gre")),
-                parse_number(record.get("gre_v")),
-                parse_number(record.get("gre_aw")),
-                clean_text(record.get("masters_or_phd")),
-                clean_text(record.get("llm-generated-program")),
-                clean_text(record.get("llm-generated-university")),
-            )
-        )
+    # open source file, detect whether it is JSON array or line delimited JSON and load into records
+    records = []
+    with open(sourcefile, encoding="utf-8") as handle:
+        first_char = ""
+        # find first non-whitespace character to determine which file type
+        while True:
+            pos = handle.tell()
+            chunk = handle.read(1)
+            if not chunk:
+                break
+            if not chunk.isspace():
+                first_char = chunk
+                handle.seek(pos)
+                break
+        # read entire JSON if normal array
+        if first_char == "[":
+            records = json.load(handle)
+        # read line by line if JSON line delimited
+        else:
+            for line in handle:
+                line = line.strip()
+                if not line:
+                    continue
+                records.append(json.loads(line))
 
     # open connection
     with psycopg.connect(
@@ -55,8 +55,8 @@ def load():
         user="postgres",
     ) as connection:
         with connection.cursor() as cur:
-            # drop table if it already exists
-            cur.execute('DROP TABLE IF EXISTS applicantData')
+            if reset:
+                cur.execute("DROP TABLE IF EXISTS applicantData")
             # create table with required schema
             cur.execute(
                 """
@@ -79,6 +79,39 @@ def load():
                 );
                 """
             )
+            # create unique index on url to avoid duplicates in database
+            cur.execute(
+                """
+                CREATE UNIQUE INDEX IF NOT EXISTS applicantdata_url_key
+                ON applicantData (url);
+                """
+            )
+            # find next available p_id
+            cur.execute("SELECT COALESCE(MAX(p_id), 0) FROM applicantData;")
+            max_id = cur.fetchone()[0]
+
+            # clean data for load into db and create list of tuples
+            rows = []
+            for idx, record in enumerate(records, start=max_id + 1):
+                rows.append(
+                    (
+                        idx,
+                        clean_text(record.get("program")),
+                        clean_text(record.get("comments")),
+                        clean_text(record.get("date_added")),
+                        clean_text(record.get("url")),
+                        clean_text(record.get("applicant_status")),
+                        clean_text(record.get("semester_year_start")),
+                        clean_text(record.get("citizenship")),
+                        parse_number(record.get("gpa")),
+                        parse_number(record.get("gre")),
+                        parse_number(record.get("gre_v")),
+                        parse_number(record.get("gre_aw")),
+                        clean_text(record.get("masters_or_phd")),
+                        clean_text(record.get("llm-generated-program")),
+                        clean_text(record.get("llm-generated-university")),
+                    )
+                )
             # insert each row into the table
             cur.executemany(
                 """
@@ -95,9 +128,9 @@ def load():
                     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
                 )
                 /* skip ids where one already exists */
-                ON CONFLICT (p_id) DO NOTHING;
+                ON CONFLICT (url) DO NOTHING;
                 """,
                 rows,
             )
 
-    print(f"Loaded {len(rows)} records into applicantData.")
+    print(f"Loaded {len(rows)} records into applicantData from {sourcefile}.")

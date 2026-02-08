@@ -1,3 +1,13 @@
+"""
+This module contains declarations for all the sql queries,
+the structured output to render on the website and to output
+to console, and it contains a main declaration to run the
+script directly or testing purposes.
+"""
+
+import psycopg
+
+
 QUERY_1 = """
 SELECT COUNT(*) AS count_fall_2026
 FROM applicantData
@@ -20,32 +30,18 @@ SELECT ROUND(
 FROM applicantData;
 """
 
-QUERY_3_GPA = """
-SELECT AVG(gpa) AS avg_gpa
-FROM applicantData
-WHERE gpa IS NOT NULL;
-"""
-
-QUERY_3_GRE = """
-SELECT AVG(gre) AS avg_gre
-FROM applicantData
-WHERE gre IS NOT NULL;
-"""
-
-QUERY_3_GRE_V = """
-SELECT AVG(gre_v) AS avg_gre_v
-FROM applicantData
-WHERE gre_v IS NOT NULL;
-"""
-
-QUERY_3_GRE_AW = """
-SELECT AVG(gre_aw) AS avg_gre_aw
-FROM applicantData
-WHERE gre_aw IS NOT NULL;
+QUERY_3 = """
+SELECT
+    /* Round float cast as numeric to two decimal places */
+    ROUND(AVG(gpa)::numeric, 2) AS avg_gpa,
+    ROUND(AVG(gre)::numeric, 2) AS avg_gre,
+    ROUND(AVG(gre_v)::numeric, 2) AS avg_gre_v,
+    ROUND(AVG(gre_aw)::numeric, 2) AS avg_gre_aw
+FROM applicantData;
 """
 
 QUERY_4 = """
-SELECT AVG(gpa) AS avg_gpa_american_fall_2026
+SELECT ROUND(AVG(gpa)::numeric, 2) AS avg_gpa_american_fall_2026
 FROM applicantData
 WHERE term = 'Fall 2026'
   AND us_or_international ILIKE 'American'
@@ -63,7 +59,7 @@ WHERE term = 'Fall 2026';
 """
 
 QUERY_6 = """
-SELECT AVG(gpa) AS avg_gpa_fall_2026_accepted
+SELECT ROUND(AVG(gpa)::numeric, 2) AS avg_gpa_fall_2026_accepted
 FROM applicantData
 WHERE term = 'Fall 2026'
   AND status ILIKE 'Accepted'
@@ -148,36 +144,53 @@ FROM applicantData
 WHERE term = 'Fall 2026';
 """
 
-import psycopg
-
-DB_NAME = "studentCourses"
-DB_USER = "postgres"
-
+# list of queries
 QUERIES = [
-    ("1. Number of applications for Fall 2026", QUERY_1),
-    ("2. Percentage of international students (not American/Other)", QUERY_2),
-    ("3. Average GPA", QUERY_3_GPA),
-    ("3. Average GRE", QUERY_3_GRE),
-    ("3. Average GRE V", QUERY_3_GRE_V),
-    ("3. Average GRE AW", QUERY_3_GRE_AW),
-    ("4. Average GPA of American students in Fall 2026)", QUERY_4),
-    ("5. Percent of Fall 2026 acceptances", QUERY_5),
-    ("6. Average GPA of applicants who applied for Fall 2026", QUERY_6),
-    ("7. Number of applicants who applied to JHU for MS Computer Science degrees", QUERY_7),
-    ("7a. Number of applicants who applied to JHU for MS Computer Science degrees (LLM)", QUERY_7a),
-    ("8. Number of 2026 acceptances for CS PhD at Georgetown, MIT, Stanford, Carnegie Mellon", QUERY_8),
-    ("8a. Number of 2026 acceptances for CS PhD at Georgetown, MIT, Stanford, Carnegie Mellon (LLM)", QUERY_8a),
-    ("9. Number of rejected engineering applicants for Fall 2026", QUERY_9),
-    ("10. Percent of rejected international engineering applicants for Fall 2026", QUERY_10)
+    (
+        "1. How many entries do you have in your database who have applied for Fall 2026?",
+        "Answer: Applicant count: ",
+        QUERY_1,
+    ),
+    ("2. What percentage of entries are from international students (not American or Other) (to two decimal places)?",
+     "Answer: Percent International: ",
+     QUERY_2),
+    ("3. What is the average GPA, GRE, GRE V, and GRE AW of applicants who provide these metrics?",
+     "Answer: ",
+     QUERY_3),
+    ("4. What is their average GPA of American students in Fall 2026?)", "Answer: Average GPA American: ", QUERY_4),
+    ("5. What percent of entries for Fall 2026 are Acceptances (to two decimal places)?", "Answer: Acceptance"
+                                                                                          " percent: ", QUERY_5),
+    ("6. What is the average GPA of applicants who applied for Fall 2026 who are Acceptances?", "Answer: Average"
+                                                                                                " GPA Acceptance: ",
+     QUERY_6),
+    ("7. How many entries are from applicants who applied to JHU for a masters degrees in Computer Science?",
+     "Answer: JHU CS Masters Applicants: ", QUERY_7),
+    ("7a. Number of applicants who applied to JHU for MS Computer Science degrees (LLM)",
+     "Answer: JHU CS Masters Applicants (LLM): ",
+     QUERY_7a),
+    ("8. How many entries from 2026 are acceptances from applicants who applied to Georgetown University, MIT,"
+     " Stanford University, or Carnegie Mellon University for a PhD in Computer Science?",
+     "Answer: 2026 Acceptances for CS PhD at Georgetown, Stanford and Carnegie Mellon: ", QUERY_8),
+    ("8a. Number of 2026 acceptances for CS PhD at Georgetown, MIT, Stanford, Carnegie Mellon (LLM)",
+     "Answer: 2026 Acceptances for CS PhD at Georgetown, Stanford and Carnegie Mellon (LLM): ", QUERY_8a),
+    ("9. Number of rejected engineering applicants for Fall 2026", "Answer: Count of rejected Engineering applicants"
+                                                                   " for Fall 2026: ", QUERY_9),
+    ("10. Percent of rejected international engineering applicants for Fall 2026",
+     "Answer: Percent of rejected international engineering applicants for Fall 2026: ", QUERY_10)
 ]
 
+# connect to database and print query results - used for testing purposes
 if __name__ == "__main__":
     with psycopg.connect(
-        dbname=DB_NAME,
-        user=DB_USER,
+        dbname="studentCourses",
+        user="postgres",
     ) as connection:
         with connection.cursor() as cur:
-            for label, query in QUERIES:
+            for label, prefix, query in QUERIES:
                 cur.execute(query)
                 result = cur.fetchone()
-                print(f"{label}: {result[0] if result else None}")
+                if result and len(result) > 1:
+                    value = f"GPA: {result[0]}, GRE: {result[1]}, GRE V: {result[2]}, GRE AW: {result[3]}"
+                else:
+                    value = result[0] if result else None
+                print(f"{label}: {prefix}{value if result else None}")

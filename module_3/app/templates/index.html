@@ -1,0 +1,22 @@
+{% extends 'base.html' %} <!-- Connect child with parent template -->
+
+ <!-- Connect child with parent block using block's name content -->
+{% block content %}
+    <h1>User Guidance</h1>
+        <h3>1. Use the <strong>Pull Data</strong> button in the top right navigation to fetch new Grad Cafe entries, clean them,
+        and save them to the database. Existing entries are skipped based on URL.</h3>
+    <h3>2. Use the Update Analysis button in the top right navigation to refresh the query results.</h3>
+    <p class="warning-text">Note: Update Analysis will not run while a Pull Data request is in progress.</p>
+        {% if messages %}
+            {% for message in messages %}
+                <p><strong>{{ message }}</strong></p>
+            {% endfor %}
+        {% endif %}
+    <h1>{% block title %} Query Results {% endblock title %}</h1>
+    {% for label, prefix, value in results %}
+        <div class="course">
+            <h3><b>{{ label }}</b></h3>
+            <p><i>{{ prefix }}{{ value }}</i></p>
+        </div>
+    {% endfor %}
+{% endblock content %}
