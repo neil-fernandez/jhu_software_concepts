@@ -15,7 +15,7 @@ Approach:
     I then built out my flask app in app.py. I brought across my work from module 2 in clean.py and scrape.py
     to address part A and part B of the flask webpage part of the assignment. I styled my site per the
     assignment instructions. I then implemented the buttons which made use of my clean, scrape, load and query
-    modules.
+    modules. I used some javascript to prevent users from updating analysis while pulling data.
 
     In the final product, the app was tested and run by directly executing app.py
 
