@@ -1,0 +1,285 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>app &mdash; module_4 assignment 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            module_4 assignment
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview_setup.html">Overview and Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testing_guide.html">Testing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../publishing.html">Build and Publish Docs (GitHub)</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">module_4 assignment</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">app</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for app</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This Python script is used to start a local web application</span>
+<span class="sd">built using Flask to load the llm output, display query results,</span>
+<span class="sd">scrape and load new records into a postgresql database and update</span>
+<span class="sd">query analysis as required.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">load_data</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ld</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">query_data</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">qd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scrape</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">psycopg</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">flask</span><span class="w"> </span><span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">get_flashed_messages</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">jsonify</span>
+<span class="n">LAST_RESULTS</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">PULL_DATA_PROCESS</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+<span class="c1"># check if pull data subprocess is running</span>
+<div class="viewcode-block" id="pull_data_busy">
+<a class="viewcode-back" href="../api_flask_routes.html#app.pull_data_busy">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">pull_data_busy</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">PULL_DATA_PROCESS</span>
+    <span class="k">if</span> <span class="n">PULL_DATA_PROCESS</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">PULL_DATA_PROCESS</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="n">PULL_DATA_PROCESS</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<span class="c1"># start new background process to run pull job</span>
+<div class="viewcode-block" id="start_pull_worker">
+<a class="viewcode-back" href="../api_flask_routes.html#app.start_pull_worker">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">start_pull_worker</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">PULL_DATA_PROCESS</span>
+    <span class="n">PULL_DATA_PROCESS</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="vm">__file__</span><span class="p">,</span> <span class="s2">&quot;--run-pull-job&quot;</span><span class="p">],</span>
+    <span class="p">)</span></div>
+
+
+<span class="c1"># run pull data, calling scrape, save and looad</span>
+<div class="viewcode-block" id="run_pull_job">
+<a class="viewcode-back" href="../api_flask_routes.html#app.run_pull_job">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_pull_job</span><span class="p">():</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">scrape_data</span><span class="p">(</span>
+        <span class="s2">&quot;https://www.thegradcafe.com/survey/&quot;</span><span class="p">,</span>
+        <span class="n">max_pages</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">new_cleaned_file</span> <span class="o">=</span> <span class="s2">&quot;new_only.json&quot;</span>
+    <span class="n">sd</span><span class="o">.</span><span class="n">save_data</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">new_cleaned_file</span><span class="p">)</span>
+    <span class="n">ld</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">new_cleaned_file</span><span class="p">)</span></div>
+
+
+<span class="c1"># clear cached results allowing for next request to re-run queries</span>
+<div class="viewcode-block" id="perform_update_analysis">
+<a class="viewcode-back" href="../api_flask_routes.html#app.perform_update_analysis">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">perform_update_analysis</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">LAST_RESULTS</span>
+    <span class="c1"># Force next /analysis load to execute fresh queries.</span>
+    <span class="n">LAST_RESULTS</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+
+<span class="c1"># return postgresql connection</span>
+<div class="viewcode-block" id="get_db_connection">
+<a class="viewcode-back" href="../api_flask_routes.html#app.get_db_connection">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_db_connection</span><span class="p">():</span>
+    <span class="n">db_url</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;DATABASE_URL&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">db_url</span><span class="p">:</span>
+        <span class="n">connect_signature</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">psycopg</span><span class="o">.</span><span class="n">connect</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;value&quot;</span> <span class="ow">in</span> <span class="n">connect_signature</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">psycopg</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">db_url</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">psycopg</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">conninfo</span><span class="o">=</span><span class="n">db_url</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">psycopg</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
+        <span class="n">dbname</span><span class="o">=</span><span class="s2">&quot;studentCourses&quot;</span><span class="p">,</span>
+        <span class="n">user</span><span class="o">=</span><span class="s2">&quot;postgres&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<span class="c1"># Connect URL route &#39;/&#39; to index.html</span>
+<div class="viewcode-block" id="index">
+<a class="viewcode-back" href="../api_flask_routes.html#app.index">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">LAST_RESULTS</span>
+    <span class="n">skip_queries</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;skip_queries&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="n">get_flashed_messages</span><span class="p">()</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">LAST_RESULTS</span>
+
+    <span class="c1"># open connection, get all the query results and pass the results and flashed status message variables</span>
+    <span class="c1"># get the latest query only if the skip query flag is not set</span>
+    <span class="c1"># LAST_RESULTS keeps a cache of the previous query to avoid a blank page</span>
+    <span class="k">if</span> <span class="n">skip_queries</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">LAST_RESULTS</span><span class="p">:</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">LAST_RESULTS</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Preserve page structure without hitting the database.</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="p">[(</span><span class="n">label</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">_query</span> <span class="ow">in</span> <span class="n">qd</span><span class="o">.</span><span class="n">QUERIES</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">LAST_RESULTS</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">get_db_connection</span><span class="p">()</span> <span class="k">as</span> <span class="n">connection</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">connection</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span> <span class="k">as</span> <span class="n">cur</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">query</span> <span class="ow">in</span> <span class="n">qd</span><span class="o">.</span><span class="n">QUERIES</span><span class="p">:</span>
+                    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+                    <span class="n">row</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+                    <span class="c1"># handle query result which has multiple outputs on one line</span>
+                    <span class="k">if</span> <span class="n">row</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;GPA: </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">, GRE: </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">, GRE V: </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2">, GRE AW: </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">row</span> <span class="k">else</span> <span class="kc">None</span>
+                    <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">label</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+                    <span class="c1">#print result to console</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">prefix</span><span class="si">}{</span><span class="n">value</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">row</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="kc">None</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">LAST_RESULTS</span> <span class="o">=</span> <span class="n">results</span>  <span class="c1"># cache query results</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
+        <span class="s1">&#39;index.html&#39;</span><span class="p">,</span>
+        <span class="n">results</span><span class="o">=</span><span class="n">results</span><span class="p">,</span>
+        <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">,</span>
+        <span class="n">skip_queries</span><span class="o">=</span><span class="n">skip_queries</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="c1"># Connect URL route &#39;pull-data&#39; to scrape, clean, save to json and load any new records into database</span>
+<div class="viewcode-block" id="pull_data">
+<a class="viewcode-back" href="../api_flask_routes.html#app.pull_data">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">pull_data</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">pull_data_busy</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;ok&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;busy&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}),</span> <span class="mi">409</span>
+    <span class="n">start_pull_worker</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;ok&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;busy&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}),</span> <span class="mi">200</span></div>
+
+
+
+<div class="viewcode-block" id="update_analysis">
+<a class="viewcode-back" href="../api_flask_routes.html#app.update_analysis">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">update_analysis</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">pull_data_busy</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;ok&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;busy&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}),</span> <span class="mi">409</span>
+    <span class="n">perform_update_analysis</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;ok&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;busy&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}),</span> <span class="mi">200</span></div>
+
+
+<span class="c1"># set up Flask app using application factory pattern</span>
+<div class="viewcode-block" id="register_routes">
+<a class="viewcode-back" href="../api_flask_routes.html#app.register_routes">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_routes</span><span class="p">(</span><span class="n">flask_app</span><span class="p">):</span>
+    <span class="n">flask_app</span><span class="o">.</span><span class="n">add_url_rule</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">,</span> <span class="n">view_func</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">])</span>
+    <span class="n">flask_app</span><span class="o">.</span><span class="n">add_url_rule</span><span class="p">(</span><span class="s2">&quot;/analysis&quot;</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;analysis&quot;</span><span class="p">,</span> <span class="n">view_func</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">])</span>
+    <span class="n">flask_app</span><span class="o">.</span><span class="n">add_url_rule</span><span class="p">(</span><span class="s2">&quot;/pull-data&quot;</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;pull_data&quot;</span><span class="p">,</span> <span class="n">view_func</span><span class="o">=</span><span class="n">pull_data</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">])</span>
+    <span class="n">flask_app</span><span class="o">.</span><span class="n">add_url_rule</span><span class="p">(</span><span class="s2">&quot;/update-analysis&quot;</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;update_analysis&quot;</span><span class="p">,</span> <span class="n">view_func</span><span class="o">=</span><span class="n">update_analysis</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">])</span></div>
+
+
+<span class="c1"># build new Flask app</span>
+<div class="viewcode-block" id="create_app">
+<a class="viewcode-back" href="../api_flask_routes.html#app.create_app">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_app</span><span class="p">():</span>
+    <span class="n">flask_app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="n">flask_app</span><span class="o">.</span><span class="n">secret_key</span> <span class="o">=</span> <span class="s2">&quot;dev&quot;</span>
+    <span class="n">register_routes</span><span class="p">(</span><span class="n">flask_app</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">flask_app</span></div>
+
+
+<span class="c1"># keep existing global app for normal runtime; tests can call create_app() for fresh instance</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">create_app</span><span class="p">()</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="s2">&quot;--run-pull-job&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">:</span>
+        <span class="n">run_pull_job</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="ne">SystemExit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># load initial cleaned file into db, resetting db as a clean start</span>
+    <span class="n">initial_cleaned_file</span> <span class="o">=</span> <span class="s2">&quot;llm_extend_applicant_data.json&quot;</span>
+    <span class="n">ld</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">initial_cleaned_file</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Start the web application on local network</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">&#39;0.0.0.0&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8080</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Neil Fernandez.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
