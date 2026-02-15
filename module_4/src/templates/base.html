@@ -1,0 +1,117 @@
+<!-- This is the html base template to render child blocks-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %} {% endblock title %}- Grad School Cafe Data Analysis</title>
+    <!--Declare style sheet from static URL-->
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+</head>
+<body>
+    <nav class="nav">
+        <a href="{{ url_for('index') }}">Grad School Cafe Data Analysis</a>
+        <!--Nav bar with Pull Data and Update Analysis buttons-->
+        <div class="nav-actions">
+            <!--Pull data-->
+            <form action="{{ url_for('pull_data') }}" method="post" id="pull-data-form">
+                <button class="nav-button" type="submit" id="pull-data-button"
+                    title="Fetches new Grad Cafe entries and loads them into the database.">Pull Data</button>
+            </form>
+            <!--Update analysis-->
+            <form action="{{ url_for('update_analysis') }}" method="post" id="update-analysis-form">
+                <button class="nav-button" type="submit" id="update-analysis-button"
+                    title="Refreshes the analysis with the latest data.">Update Analysis</button>
+            </form>
+        </div>
+    </nav>
+    <hr>
+    <div class="content"></div>
+             <!--Display hint or extend with child template block-->
+            {% block content %} {% endblock content %}
+    </div>
+    <!--listener to disable buttons while pulling data, wait until HTML fully loaded -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // grab the pull data form, update analysis button and pull data button
+            var pullForm = document.getElementById("pull-data-form");
+            var updateForm = document.getElementById("update-analysis-form");
+            var updateButton = document.getElementById("update-analysis-button");
+            var pullButton = document.getElementById("pull-data-button");
+
+            // stop if form or buttons not found
+            if (!pullForm || !updateButton) {
+                return;
+            }
+            // submit pull-data as JSON request, then return user to analysis page
+            pullForm.addEventListener("submit", async function (event) {
+                event.preventDefault();
+                updateButton.disabled = true;
+                updateButton.classList.add("is-disabled");
+                updateButton.setAttribute("aria-disabled", "true");
+
+                if (pullButton) {
+                    pullButton.disabled = true;
+                    pullButton.classList.add("is-disabled");
+                }
+
+                try {
+                    var response = await fetch(pullForm.action, {
+                        method: "POST",
+                        headers: { "X-Requested-With": "XMLHttpRequest" }
+                    });
+                    if (!response.ok) {
+                        throw new Error("Pull Data request failed.");
+                    }
+                    window.location.href = "{{ url_for('index', skip_queries=1) }}";
+                } catch (_error) {
+                    updateButton.disabled = false;
+                    updateButton.classList.remove("is-disabled");
+                    updateButton.removeAttribute("aria-disabled");
+
+                    if (pullButton) {
+                        pullButton.disabled = false;
+                        pullButton.classList.remove("is-disabled");
+                    }
+                }
+            });
+
+            if (updateForm) {
+                updateForm.addEventListener("submit", async function (event) {
+                    event.preventDefault();
+                    updateButton.disabled = true;
+                    updateButton.classList.add("is-disabled");
+                    updateButton.setAttribute("aria-disabled", "true");
+
+                    try {
+                        for (var attempt = 0; attempt < 30; attempt += 1) {
+                            var response = await fetch(updateForm.action, {
+                                method: "POST",
+                                headers: { "X-Requested-With": "XMLHttpRequest" }
+                            });
+                            if (!response.ok) {
+                                throw new Error("Update Analysis request failed.");
+                            }
+
+                            var payload = await response.json();
+                            if (!payload || !payload.busy) {
+                                window.location.href = "{{ url_for('index') }}";
+                                return;
+                            }
+
+                            await new Promise(function (resolve) {
+                                setTimeout(resolve, 1000);
+                            });
+                        }
+                        throw new Error("Update Analysis timed out waiting for pull-data to finish.");
+                    } catch (_error) {
+                        updateButton.disabled = false;
+                        updateButton.classList.remove("is-disabled");
+                        updateButton.removeAttribute("aria-disabled");
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
