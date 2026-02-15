@@ -43,6 +43,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../overview_setup.html">Overview and Setup</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operational_notes.html">Operational Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api_reference.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../testing_guide.html">Testing Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../publishing.html">Build and Publish Docs (GitHub)</a></li>
@@ -73,12 +74,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for scrape</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">This module contains functions to respectively perform web scraping of</span>
-<span class="sd">student data (scrape_data), compare the scraped data against a normalised list</span>
-<span class="sd">of urls from the existing applicant database (get_existing_urls and normalise_url),</span>
-<span class="sd">and save the new cleaned records in JSON format and back to the database (save_data).</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;Scraping and persistence helpers for applicant survey data collection.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">urllib3</span>
@@ -89,6 +85,12 @@
 <div class="viewcode-block" id="normalise_url">
 <a class="viewcode-back" href="../api_scrape.html#scrape.normalise_url">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">normalise_url</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Normalize URL text for duplicate detection.</span>
+
+<span class="sd">    :param value: Raw URL value from source data.</span>
+<span class="sd">    :return: Canonicalized URL without trailing slash, or ``None``.</span>
+<span class="sd">    :rtype: str | None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span></div>
@@ -98,6 +100,11 @@
 <div class="viewcode-block" id="get_existing_urls">
 <a class="viewcode-back" href="../api_scrape.html#scrape.get_existing_urls">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_existing_urls</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch normalized applicant URLs already present in PostgreSQL.</span>
+
+<span class="sd">    :return: Set of normalized URLs currently stored in ``applicantData``.</span>
+<span class="sd">    :rtype: set[str]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">urls</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>    <span class="c1"># create empty set for existing urls in applicant database</span>
     <span class="c1"># get the set of normalised existing urls in applicant db where url is not null</span>
     <span class="k">with</span> <span class="n">psycopg</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
@@ -117,6 +124,15 @@
 <div class="viewcode-block" id="scrape_data">
 <a class="viewcode-back" href="../api_scrape.html#scrape.scrape_data">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">scrape_data</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">max_pages</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Scrape survey pages and return only rows not already in the database.</span>
+
+<span class="sd">    :param url: Base survey URL.</span>
+<span class="sd">    :type url: str</span>
+<span class="sd">    :param max_pages: Maximum number of paginated survey pages to request.</span>
+<span class="sd">    :type max_pages: int</span>
+<span class="sd">    :return: Newly scraped and cleaned applicant rows.</span>
+<span class="sd">    :rtype: list[dict]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">seen</span> <span class="o">=</span> <span class="n">get_existing_urls</span><span class="p">()</span> <span class="ow">or</span> <span class="nb">set</span><span class="p">()</span> <span class="c1"># get existing urls in applicant db</span>
 
@@ -162,6 +178,14 @@
 <div class="viewcode-block" id="save_data">
 <a class="viewcode-back" href="../api_scrape.html#scrape.save_data">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">save_data</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">outputfile</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Write scraped rows to a JSON file.</span>
+
+<span class="sd">    :param rows: Row dictionaries to serialize.</span>
+<span class="sd">    :type rows: list[dict] | None</span>
+<span class="sd">    :param outputfile: Output JSON path.</span>
+<span class="sd">    :type outputfile: str</span>
+<span class="sd">    :return: ``None``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">rows</span><span class="p">:</span>
         <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outputfile</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>

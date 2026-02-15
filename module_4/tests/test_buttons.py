@@ -1,3 +1,5 @@
+"""Route-level tests for analysis page action buttons and busy gating."""
+
 import pytest
 
 import app as flask_app_module
@@ -5,6 +7,7 @@ import app as flask_app_module
 
 @pytest.fixture()
 def app():
+    """Create a test-configured Flask app with worker state reset."""
     flask_app = flask_app_module.create_app()
     flask_app.config["TESTING"] = True
     flask_app.config["LIVESERVER_PORT"] = 8080
@@ -16,12 +19,14 @@ def app():
 
 @pytest.fixture()
 def client(app):
+    """Create a test client for button endpoint requests."""
     return app.test_client()
 
 
 # test POST /pull-data returns Status 200
 @pytest.mark.buttons
 def test_post_pull_data_returns_200(client, monkeypatch):
+    """Ensure ``POST /pull-data`` succeeds when no worker is active."""
     # monkeypatch to ensure that the real "/pull-data" path is not queried
     monkeypatch.setattr(flask_app_module.sd, "scrape_data", lambda *_args, **_kwargs: [])
     monkeypatch.setattr(flask_app_module.sd, "save_data", lambda *_args, **_kwargs: None)
@@ -55,6 +60,7 @@ def test_post_pull_data_returns_200(client, monkeypatch):
 # test POST /pull-data triggers the loader using mocked subprocess execution path for scraper and a mocked loader
 @pytest.mark.buttons
 def test_post_pull_data_triggers_loader(client, monkeypatch):
+    """Ensure pull-data flow passes scraped rows through save and load stages."""
     # create fake scraped data matching cleaned schema
     fake_rows = [
         {
@@ -148,6 +154,7 @@ def test_post_pull_data_triggers_loader(client, monkeypatch):
 # when busy, POST /pull-data returns 409
 @pytest.mark.buttons
 def test_post_pull_data_returns_409_when_busy_and_skips_update_when_busy(client, monkeypatch):
+    """Ensure ``POST /pull-data`` returns 409 and does not launch when busy."""
     calls = {"popen_called": False}
 
     class FakeRunningProcess:
@@ -173,6 +180,7 @@ def test_post_pull_data_returns_409_when_busy_and_skips_update_when_busy(client,
 # test POST /update-analysis returns 200 when not busy
 @pytest.mark.buttons
 def test_post_update_analysis_returns_200_when_not_busy(client):
+    """Ensure ``POST /update-analysis`` succeeds when not busy."""
     response = client.post("/update-analysis")
     assert response.status_code == 200
     data = response.get_json()
@@ -186,6 +194,7 @@ def test_post_update_analysis_returns_200_when_not_busy(client):
 # when busy, POST /update-analysis returns 409
 @pytest.mark.buttons
 def test_post_update_analysis_returns_409_and_skips_update_when_busy(client, monkeypatch):
+    """Ensure ``POST /update-analysis`` returns 409 and skips cache update when busy."""
     calls = {"updated": False}  # keep track of updated logic
 
     # simulate pull-data is still running

@@ -46,6 +46,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview_setup.html">Overview and Setup</a></li>
 <li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="operational_notes.html">Operational Notes</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="api_reference.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="api_scrape.html">scrape.py</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">clean.py</a><ul>
@@ -55,6 +56,7 @@
 <li class="toctree-l2"><a class="reference internal" href="api_load_data.html">load_data.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api_query_data.html">query_data.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api_flask_routes.html">Flask App Routes (app.py)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html">Test Modules</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="testing_guide.html">Testing Guide</a></li>
@@ -88,13 +90,27 @@
              
   <section id="module-clean">
 <span id="clean-py"></span><h1>clean.py<a class="headerlink" href="#module-clean" title="Link to this heading"></a></h1>
-<p>This module contains functions clean_data which is used to
-clean scraped data using regex, beautifulsoup and string
-expressions.</p>
+<p>Data cleaning utilities for scraped applicant survey HTML.</p>
+<p>This module parses GradCafe table markup and extracts normalized fields used
+by downstream loading and analysis steps.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="clean.clean_data">
 <span class="sig-prename descclassname"><span class="pre">clean.</span></span><span class="sig-name descname"><span class="pre">clean_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">html</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/clean.html#clean_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#clean.clean_data" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Parse raw survey HTML and return normalized applicant records.</p>
+<p>The parser extracts core row values and enriches each record with optional
+attributes discovered in follow-up detail rows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>html</strong> (<em>str</em>) – Raw HTML content containing survey table rows.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of normalized applicant dictionaries.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[dict]</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 

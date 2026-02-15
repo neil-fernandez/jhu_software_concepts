@@ -1,3 +1,5 @@
+"""Integration tests for HTML cleaning and field extraction logic."""
+
 import pytest
 
 import clean as clean_module
@@ -5,6 +7,7 @@ import clean as clean_module
 
 @pytest.mark.integration
 def test_clean_data_parses_rows_and_details():
+    """Ensure row parsing captures overview fields and detail-row enrichments."""
     # test clean_data parses overview rows, detail rows, and fallback fields
     html = """
     <table>
@@ -81,6 +84,7 @@ def test_clean_data_parses_rows_and_details():
 
 @pytest.mark.integration
 def test_clean_data_returns_empty_list_when_no_rows():
+    """Ensure no table rows produces an empty record list."""
     # test clean_data returns empty list when no table rows exist
     html = "<table></table>"
     assert clean_module.clean_data(html) == []

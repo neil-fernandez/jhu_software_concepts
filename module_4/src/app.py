@@ -1,8 +1,7 @@
-"""
-This Python script is used to start a local web application
-built using Flask to load the llm output, display query results,
-scrape and load new records into a postgresql database and update
-query analysis as required.
+"""Flask application entry point for scraping, loading, and analysis views.
+
+This module wires together route handlers for query analysis display, data
+refresh operations, and background pull workflows.
 """
 
 import load_data as ld
@@ -22,6 +21,11 @@ PULL_DATA_PROCESS = None
 
 # check if pull data subprocess is running
 def pull_data_busy():
+    """Check whether the background pull-data worker is currently running.
+
+    :return: ``True`` when the worker process is active, otherwise ``False``.
+    :rtype: bool
+    """
     global PULL_DATA_PROCESS
     if PULL_DATA_PROCESS is None:
         return False
@@ -32,6 +36,7 @@ def pull_data_busy():
 
 # start new background process to run pull job
 def start_pull_worker():
+    """Start the pull-data workflow in a background subprocess."""
     global PULL_DATA_PROCESS
     PULL_DATA_PROCESS = subprocess.Popen(
         [sys.executable, __file__, "--run-pull-job"],
@@ -39,6 +44,7 @@ def start_pull_worker():
 
 # run pull data, calling scrape, save and looad
 def run_pull_job():
+    """Scrape records, write a JSON payload, and load new rows into PostgreSQL."""
     rows = sd.scrape_data(
         "https://www.thegradcafe.com/survey/",
         max_pages=5,
@@ -49,12 +55,20 @@ def run_pull_job():
 
 # clear cached results allowing for next request to re-run queries
 def perform_update_analysis():
+    """Clear cached query output so the next analysis request recomputes results."""
     global LAST_RESULTS
     # Force next /analysis load to execute fresh queries.
     LAST_RESULTS = []
 
 # return postgresql connection
 def get_db_connection():
+    """Return an open PostgreSQL connection for query execution.
+
+    Uses the ``DATABASE_URL`` environment variable when available and falls
+    back to local defaults when not set.
+
+    :return: Open PostgreSQL connection.
+    """
     db_url = os.getenv("DATABASE_URL")
     if db_url:
         connect_signature = inspect.signature(psycopg.connect)
@@ -68,6 +82,10 @@ def get_db_connection():
 
 # Connect URL route '/' to index.html
 def index():
+    """Render the analysis page with cached or freshly computed query results.
+
+    :return: Rendered HTML response for the main analysis page.
+    """
     global LAST_RESULTS
     skip_queries = request.args.get("skip_queries") == "1"
     messages = get_flashed_messages()
@@ -107,6 +125,10 @@ def index():
 
 # Connect URL route 'pull-data' to scrape, clean, save to json and load any new records into database
 def pull_data():
+    """Handle the pull-data endpoint and launch the background worker if idle.
+
+    :return: JSON payload and HTTP status indicating launch or busy state.
+    """
     if pull_data_busy():
         return jsonify({"ok": False, "busy": True}), 409
     start_pull_worker()
@@ -114,6 +136,10 @@ def pull_data():
 
 
 def update_analysis():
+    """Handle cache reset requests for analysis output.
+
+    :return: JSON payload and HTTP status indicating reset or busy state.
+    """
     if pull_data_busy():
         return jsonify({"ok": False, "busy": True}), 409
     perform_update_analysis()
@@ -121,6 +147,11 @@ def update_analysis():
 
 # set up Flask app using application factory pattern
 def register_routes(flask_app):
+    """Register all URL routes for the Flask application.
+
+    :param flask_app: Application instance to configure.
+    :type flask_app: Flask
+    """
     flask_app.add_url_rule("/", endpoint="index", view_func=index, methods=["GET"])
     flask_app.add_url_rule("/analysis", endpoint="analysis", view_func=index, methods=["GET"])
     flask_app.add_url_rule("/pull-data", endpoint="pull_data", view_func=pull_data, methods=["POST"])
@@ -128,6 +159,11 @@ def register_routes(flask_app):
 
 # build new Flask app
 def create_app():
+    """Create and configure the Flask app instance.
+
+    :return: Configured Flask application.
+    :rtype: Flask
+    """
     flask_app = Flask(__name__)
     flask_app.secret_key = "dev"
     register_routes(flask_app)

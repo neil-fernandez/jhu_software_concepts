@@ -1,9 +1,4 @@
-"""
-This module contains functions to respectively perform web scraping of
-student data (scrape_data), compare the scraped data against a normalised list
-of urls from the existing applicant database (get_existing_urls and normalise_url),
-and save the new cleaned records in JSON format and back to the database (save_data).
-"""
+"""Scraping and persistence helpers for applicant survey data collection."""
 
 import json
 import urllib3
@@ -12,12 +7,23 @@ from clean import clean_data
 
 
 def normalise_url(value):
+    """Normalize URL text for duplicate detection.
+
+    :param value: Raw URL value from source data.
+    :return: Canonicalized URL without trailing slash, or ``None``.
+    :rtype: str | None
+    """
     if not value:
         return None
     return str(value).strip().rstrip("/")
 
 
 def get_existing_urls():
+    """Fetch normalized applicant URLs already present in PostgreSQL.
+
+    :return: Set of normalized URLs currently stored in ``applicantData``.
+    :rtype: set[str]
+    """
     urls = set()    # create empty set for existing urls in applicant database
     # get the set of normalised existing urls in applicant db where url is not null
     with psycopg.connect(
@@ -34,6 +40,15 @@ def get_existing_urls():
 
 
 def scrape_data(url, max_pages=1):
+    """Scrape survey pages and return only rows not already in the database.
+
+    :param url: Base survey URL.
+    :type url: str
+    :param max_pages: Maximum number of paginated survey pages to request.
+    :type max_pages: int
+    :return: Newly scraped and cleaned applicant rows.
+    :rtype: list[dict]
+    """
 
     seen = get_existing_urls() or set() # get existing urls in applicant db
 
@@ -76,6 +91,14 @@ def scrape_data(url, max_pages=1):
 
 # save cleaned data to json file
 def save_data(rows, outputfile):
+    """Write scraped rows to a JSON file.
+
+    :param rows: Row dictionaries to serialize.
+    :type rows: list[dict] | None
+    :param outputfile: Output JSON path.
+    :type outputfile: str
+    :return: ``None``
+    """
     if not rows:
         rows = []
     with open(outputfile, "w", encoding="utf-8") as f:

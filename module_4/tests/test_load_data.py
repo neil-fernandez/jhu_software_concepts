@@ -1,3 +1,5 @@
+"""Integration tests for JSON loading and value normalization helpers."""
+
 import io
 import builtins
 
@@ -8,6 +10,7 @@ import load_data as load_data_module
 
 @pytest.mark.integration
 def test_clean_text_and_parse_number():
+    """Ensure helper normalizers clean null bytes and parse numeric tokens."""
     # test clean_text strips null bytes and parse_number handles numbers and None
     assert load_data_module.clean_text(None) is None
     assert load_data_module.clean_text("ab\x00cd") == "abcd"
@@ -18,6 +21,7 @@ def test_clean_text_and_parse_number():
 
 @pytest.mark.integration
 def test_load_reads_json_array_and_resets_table(monkeypatch, capsys):
+    """Ensure array JSON input loads rows and reset mode recreates state."""
     # test load reads JSON array, resets table, and inserts rows with incremented ids
     json_content = """
     [
@@ -81,6 +85,7 @@ def test_load_reads_json_array_and_resets_table(monkeypatch, capsys):
 
 @pytest.mark.integration
 def test_load_reads_json_lines_and_skips_blank_lines(monkeypatch):
+    """Ensure line-delimited JSON input is parsed and blank lines are ignored."""
     # test load reads line-delimited json and skips blank lines
     json_lines = """
     {"program": "CS, U", "url": "u1", "gpa": "3.90"}
@@ -138,6 +143,7 @@ def test_load_reads_json_lines_and_skips_blank_lines(monkeypatch):
 
 @pytest.mark.integration
 def test_load_handles_empty_file(monkeypatch):
+    """Ensure empty input files result in zero inserted rows."""
     # test load handles empty file and inserts zero rows
     def fake_open(_path, encoding=None):
         return io.StringIO("")

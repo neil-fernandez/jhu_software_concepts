@@ -1,0 +1,202 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>test_clean &mdash; module_4 assignment 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            module_4 assignment
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview_setup.html">Overview and Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operational_notes.html">Operational Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testing_guide.html">Testing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../publishing.html">Build and Publish Docs (GitHub)</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">module_4 assignment</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">test_clean</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for test_clean</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Integration tests for HTML cleaning and field extraction logic.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">clean</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">clean_module</span>
+
+
+<div class="viewcode-block" id="test_clean_data_parses_rows_and_details">
+<a class="viewcode-back" href="../api_tests.html#test_clean.test_clean_data_parses_rows_and_details">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">integration</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_clean_data_parses_rows_and_details</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure row parsing captures overview fields and detail-row enrichments.&quot;&quot;&quot;</span>
+    <span class="c1"># test clean_data parses overview rows, detail rows, and fallback fields</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    &lt;table&gt;</span>
+<span class="s2">        &lt;tr&gt;</span>
+<span class="s2">            &lt;td&gt;Detail without last row&lt;/td&gt;</span>
+<span class="s2">        &lt;/tr&gt;</span>
+<span class="s2">        &lt;tr&gt;</span>
+<span class="s2">            &lt;td&gt;Example University &lt;a href=&quot;/result/abc&quot;&gt;Overview&lt;/a&gt;&lt;/td&gt;</span>
+<span class="s2">            &lt;td&gt;Computer Science&lt;/td&gt;</span>
+<span class="s2">            &lt;td&gt;January 10, 2025&lt;/td&gt;</span>
+<span class="s2">        &lt;/tr&gt;</span>
+<span class="s2">        &lt;tr&gt;</span>
+<span class="s2">            &lt;td colspan=&quot;3&quot;&gt;</span>
+<span class="s2">                &lt;div&gt;Accepted on 12 Feb 2025&lt;/div&gt;</span>
+<span class="s2">                &lt;div&gt;PhD&lt;/div&gt;</span>
+<span class="s2">                &lt;p&gt;Great program&lt;/p&gt;</span>
+<span class="s2">                Fall 2026 International GRE 330 GRE V 165 GRE AW 4.5 GPA 3.90</span>
+<span class="s2">            &lt;/td&gt;</span>
+<span class="s2">        &lt;/tr&gt;</span>
+<span class="s2">        &lt;tr&gt;</span>
+<span class="s2">            &lt;td colspan=&quot;3&quot;&gt;</span>
+<span class="s2">                &lt;div&gt;Rejected on 1 Mar 2025&lt;/div&gt;</span>
+<span class="s2">                &lt;p&gt;Second comment&lt;/p&gt;</span>
+<span class="s2">                Spring 2027 Domestic</span>
+<span class="s2">            &lt;/td&gt;</span>
+<span class="s2">        &lt;/tr&gt;</span>
+<span class="s2">        &lt;tr&gt;</span>
+<span class="s2">            &lt;td&gt;Another University &lt;a href=&quot;https://www.thegradcafe.com/result/xyz&quot;&gt;Overview&lt;/a&gt;&lt;/td&gt;</span>
+<span class="s2">            &lt;td&gt;Data Science&lt;/td&gt;</span>
+<span class="s2">        &lt;/tr&gt;</span>
+<span class="s2">        &lt;tr&gt;</span>
+<span class="s2">            &lt;td colspan=&quot;2&quot;&gt;</span>
+<span class="s2">                Wait listed on 3 Apr 2025 US Citizen GRE 320 GRE V 160 GRE AW 4.0 GPA 3.80 MS</span>
+<span class="s2">                &lt;p&gt;Second row comment&lt;/p&gt;</span>
+<span class="s2">            &lt;/td&gt;</span>
+<span class="s2">        &lt;/tr&gt;</span>
+<span class="s2">    &lt;/table&gt;</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="n">clean_module</span><span class="o">.</span><span class="n">clean_data</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+
+    <span class="n">first</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">first</span><span class="p">[</span><span class="s2">&quot;program&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Computer Science, Example University Overview&quot;</span>
+    <span class="k">assert</span> <span class="n">first</span><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;https://www.thegradcafe.com/result/abc&quot;</span>
+    <span class="k">assert</span> <span class="n">first</span><span class="p">[</span><span class="s2">&quot;date_added&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;January 10, 2025&quot;</span>
+    <span class="k">assert</span> <span class="n">first</span><span class="p">[</span><span class="s2">&quot;semester_year_start&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Fall 2026&quot;</span>
+    <span class="k">assert</span> <span class="n">first</span><span class="p">[</span><span class="s2">&quot;applicant_status&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Accepted&quot;</span>
+    <span class="k">assert</span> <span class="n">first</span><span class="p">[</span><span class="s2">&quot;status_date&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;12 Feb 2025&quot;</span>
+    <span class="k">assert</span> <span class="n">first</span><span class="p">[</span><span class="s2">&quot;citizenship&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;International&quot;</span>
+    <span class="k">assert</span> <span class="n">first</span><span class="p">[</span><span class="s2">&quot;gre&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;330&quot;</span>
+    <span class="k">assert</span> <span class="n">first</span><span class="p">[</span><span class="s2">&quot;gre_v&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;165&quot;</span>
+    <span class="k">assert</span> <span class="n">first</span><span class="p">[</span><span class="s2">&quot;gre_aw&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;4.5&quot;</span>
+    <span class="k">assert</span> <span class="n">first</span><span class="p">[</span><span class="s2">&quot;gpa&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;3.90&quot;</span>
+    <span class="k">assert</span> <span class="n">first</span><span class="p">[</span><span class="s2">&quot;masters_or_phd&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;PhD&quot;</span>
+    <span class="k">assert</span> <span class="n">first</span><span class="p">[</span><span class="s2">&quot;comments&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Great program&quot;</span>
+
+    <span class="n">second</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">second</span><span class="p">[</span><span class="s2">&quot;program&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Data Science, Another University Overview&quot;</span>
+    <span class="k">assert</span> <span class="n">second</span><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;https://www.thegradcafe.com/result/xyz&quot;</span>
+    <span class="k">assert</span> <span class="n">second</span><span class="p">[</span><span class="s2">&quot;date_added&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">second</span><span class="p">[</span><span class="s2">&quot;semester_year_start&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">second</span><span class="p">[</span><span class="s2">&quot;applicant_status&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Wait listed&quot;</span>
+    <span class="k">assert</span> <span class="n">second</span><span class="p">[</span><span class="s2">&quot;status_date&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;3 Apr 2025&quot;</span>
+    <span class="k">assert</span> <span class="n">second</span><span class="p">[</span><span class="s2">&quot;citizenship&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;US Citizen&quot;</span>
+    <span class="k">assert</span> <span class="n">second</span><span class="p">[</span><span class="s2">&quot;gre&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;320&quot;</span>
+    <span class="k">assert</span> <span class="n">second</span><span class="p">[</span><span class="s2">&quot;gre_v&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;160&quot;</span>
+    <span class="k">assert</span> <span class="n">second</span><span class="p">[</span><span class="s2">&quot;gre_aw&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;4.0&quot;</span>
+    <span class="k">assert</span> <span class="n">second</span><span class="p">[</span><span class="s2">&quot;gpa&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;3.80&quot;</span>
+    <span class="k">assert</span> <span class="n">second</span><span class="p">[</span><span class="s2">&quot;masters_or_phd&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Masters&quot;</span>
+    <span class="k">assert</span> <span class="n">second</span><span class="p">[</span><span class="s2">&quot;comments&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Second row comment&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="test_clean_data_returns_empty_list_when_no_rows">
+<a class="viewcode-back" href="../api_tests.html#test_clean.test_clean_data_returns_empty_list_when_no_rows">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">integration</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_clean_data_returns_empty_list_when_no_rows</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure no table rows produces an empty record list.&quot;&quot;&quot;</span>
+    <span class="c1"># test clean_data returns empty list when no table rows exist</span>
+    <span class="n">html</span> <span class="o">=</span> <span class="s2">&quot;&lt;table&gt;&lt;/table&gt;&quot;</span>
+    <span class="k">assert</span> <span class="n">clean_module</span><span class="o">.</span><span class="n">clean_data</span><span class="p">(</span><span class="n">html</span><span class="p">)</span> <span class="o">==</span> <span class="p">[]</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Neil Fernandez.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

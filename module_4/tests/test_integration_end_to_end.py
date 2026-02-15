@@ -1,3 +1,5 @@
+"""End-to-end integration tests spanning pull, update, and analysis render flow."""
+
 import pytest
 from bs4 import BeautifulSoup
 
@@ -6,6 +8,7 @@ import app as flask_app_module
 
 @pytest.fixture()
 def app():
+    """Create an app instance with reset globals for integration scenarios."""
     flask_app = flask_app_module.create_app()
     flask_app.config["TESTING"] = True
     flask_app_module.PULL_DATA_PROCESS = None
@@ -15,11 +18,13 @@ def app():
 
 @pytest.fixture()
 def client(app):
+    """Create a test client for end-to-end request sequences."""
     return app.test_client()
 
 
 @pytest.mark.integration
 def test_end_to_end_pull_update_render_flow(client, monkeypatch):
+    """Ensure pull, update, and analysis render produce expected formatted output."""
     # create fake scraped input rows
     fake_rows = [
         {
@@ -179,6 +184,7 @@ def test_end_to_end_pull_update_render_flow(client, monkeypatch):
 
 @pytest.mark.integration
 def test_multiple_pull_data_requests_dedupe_by_url(client, monkeypatch):
+    """Ensure repeated pulls enforce URL-based deduplication across batches."""
     # test POST /pull-data called twice with overlapping data enforces url uniqueness
     # create two pulls with overlapping data
     first_rows = [

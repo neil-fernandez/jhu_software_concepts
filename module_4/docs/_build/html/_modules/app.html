@@ -43,6 +43,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../overview_setup.html">Overview and Setup</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operational_notes.html">Operational Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api_reference.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../testing_guide.html">Testing Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../publishing.html">Build and Publish Docs (GitHub)</a></li>
@@ -73,11 +74,10 @@
            <div itemprop="articleBody">
              
   <h1>Source code for app</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">This Python script is used to start a local web application</span>
-<span class="sd">built using Flask to load the llm output, display query results,</span>
-<span class="sd">scrape and load new records into a postgresql database and update</span>
-<span class="sd">query analysis as required.</span>
+<span></span><span class="sd">&quot;&quot;&quot;Flask application entry point for scraping, loading, and analysis views.</span>
+
+<span class="sd">This module wires together route handlers for query analysis display, data</span>
+<span class="sd">refresh operations, and background pull workflows.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">load_data</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ld</span>
@@ -99,6 +99,11 @@
 <div class="viewcode-block" id="pull_data_busy">
 <a class="viewcode-back" href="../api_flask_routes.html#app.pull_data_busy">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">pull_data_busy</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether the background pull-data worker is currently running.</span>
+
+<span class="sd">    :return: ``True`` when the worker process is active, otherwise ``False``.</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">global</span> <span class="n">PULL_DATA_PROCESS</span>
     <span class="k">if</span> <span class="n">PULL_DATA_PROCESS</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
@@ -112,6 +117,7 @@
 <div class="viewcode-block" id="start_pull_worker">
 <a class="viewcode-back" href="../api_flask_routes.html#app.start_pull_worker">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">start_pull_worker</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Start the pull-data workflow in a background subprocess.&quot;&quot;&quot;</span>
     <span class="k">global</span> <span class="n">PULL_DATA_PROCESS</span>
     <span class="n">PULL_DATA_PROCESS</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
         <span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="vm">__file__</span><span class="p">,</span> <span class="s2">&quot;--run-pull-job&quot;</span><span class="p">],</span>
@@ -122,6 +128,7 @@
 <div class="viewcode-block" id="run_pull_job">
 <a class="viewcode-back" href="../api_flask_routes.html#app.run_pull_job">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">run_pull_job</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Scrape records, write a JSON payload, and load new rows into PostgreSQL.&quot;&quot;&quot;</span>
     <span class="n">rows</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">scrape_data</span><span class="p">(</span>
         <span class="s2">&quot;https://www.thegradcafe.com/survey/&quot;</span><span class="p">,</span>
         <span class="n">max_pages</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
@@ -135,6 +142,7 @@
 <div class="viewcode-block" id="perform_update_analysis">
 <a class="viewcode-back" href="../api_flask_routes.html#app.perform_update_analysis">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">perform_update_analysis</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Clear cached query output so the next analysis request recomputes results.&quot;&quot;&quot;</span>
     <span class="k">global</span> <span class="n">LAST_RESULTS</span>
     <span class="c1"># Force next /analysis load to execute fresh queries.</span>
     <span class="n">LAST_RESULTS</span> <span class="o">=</span> <span class="p">[]</span></div>
@@ -144,6 +152,13 @@
 <div class="viewcode-block" id="get_db_connection">
 <a class="viewcode-back" href="../api_flask_routes.html#app.get_db_connection">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_db_connection</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return an open PostgreSQL connection for query execution.</span>
+
+<span class="sd">    Uses the ``DATABASE_URL`` environment variable when available and falls</span>
+<span class="sd">    back to local defaults when not set.</span>
+
+<span class="sd">    :return: Open PostgreSQL connection.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">db_url</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;DATABASE_URL&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">db_url</span><span class="p">:</span>
         <span class="n">connect_signature</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">psycopg</span><span class="o">.</span><span class="n">connect</span><span class="p">)</span>
@@ -160,6 +175,10 @@
 <div class="viewcode-block" id="index">
 <a class="viewcode-back" href="../api_flask_routes.html#app.index">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Render the analysis page with cached or freshly computed query results.</span>
+
+<span class="sd">    :return: Rendered HTML response for the main analysis page.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">global</span> <span class="n">LAST_RESULTS</span>
     <span class="n">skip_queries</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;skip_queries&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span>
     <span class="n">messages</span> <span class="o">=</span> <span class="n">get_flashed_messages</span><span class="p">()</span>
@@ -202,6 +221,10 @@
 <div class="viewcode-block" id="pull_data">
 <a class="viewcode-back" href="../api_flask_routes.html#app.pull_data">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">pull_data</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Handle the pull-data endpoint and launch the background worker if idle.</span>
+
+<span class="sd">    :return: JSON payload and HTTP status indicating launch or busy state.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">pull_data_busy</span><span class="p">():</span>
         <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;ok&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;busy&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}),</span> <span class="mi">409</span>
     <span class="n">start_pull_worker</span><span class="p">()</span>
@@ -212,6 +235,10 @@
 <div class="viewcode-block" id="update_analysis">
 <a class="viewcode-back" href="../api_flask_routes.html#app.update_analysis">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">update_analysis</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Handle cache reset requests for analysis output.</span>
+
+<span class="sd">    :return: JSON payload and HTTP status indicating reset or busy state.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">pull_data_busy</span><span class="p">():</span>
         <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;ok&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;busy&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}),</span> <span class="mi">409</span>
     <span class="n">perform_update_analysis</span><span class="p">()</span>
@@ -222,6 +249,11 @@
 <div class="viewcode-block" id="register_routes">
 <a class="viewcode-back" href="../api_flask_routes.html#app.register_routes">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">register_routes</span><span class="p">(</span><span class="n">flask_app</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Register all URL routes for the Flask application.</span>
+
+<span class="sd">    :param flask_app: Application instance to configure.</span>
+<span class="sd">    :type flask_app: Flask</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">flask_app</span><span class="o">.</span><span class="n">add_url_rule</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">,</span> <span class="n">view_func</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">])</span>
     <span class="n">flask_app</span><span class="o">.</span><span class="n">add_url_rule</span><span class="p">(</span><span class="s2">&quot;/analysis&quot;</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;analysis&quot;</span><span class="p">,</span> <span class="n">view_func</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">])</span>
     <span class="n">flask_app</span><span class="o">.</span><span class="n">add_url_rule</span><span class="p">(</span><span class="s2">&quot;/pull-data&quot;</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;pull_data&quot;</span><span class="p">,</span> <span class="n">view_func</span><span class="o">=</span><span class="n">pull_data</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">])</span>
@@ -232,6 +264,11 @@
 <div class="viewcode-block" id="create_app">
 <a class="viewcode-back" href="../api_flask_routes.html#app.create_app">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">create_app</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create and configure the Flask app instance.</span>
+
+<span class="sd">    :return: Configured Flask application.</span>
+<span class="sd">    :rtype: Flask</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">flask_app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
     <span class="n">flask_app</span><span class="o">.</span><span class="n">secret_key</span> <span class="o">=</span> <span class="s2">&quot;dev&quot;</span>
     <span class="n">register_routes</span><span class="p">(</span><span class="n">flask_app</span><span class="p">)</span>

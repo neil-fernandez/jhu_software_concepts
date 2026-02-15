@@ -43,6 +43,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../overview_setup.html">Overview and Setup</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operational_notes.html">Operational Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api_reference.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../testing_guide.html">Testing Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../publishing.html">Build and Publish Docs (GitHub)</a></li>
@@ -73,10 +74,10 @@
            <div itemprop="articleBody">
              
   <h1>Source code for clean</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">This module contains functions clean_data which is used to</span>
-<span class="sd">clean scraped data using regex, beautifulsoup and string</span>
-<span class="sd">expressions.</span>
+<span></span><span class="sd">&quot;&quot;&quot;Data cleaning utilities for scraped applicant survey HTML.</span>
+
+<span class="sd">This module parses GradCafe table markup and extracts normalized fields used</span>
+<span class="sd">by downstream loading and analysis steps.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
@@ -85,6 +86,16 @@
 <div class="viewcode-block" id="clean_data">
 <a class="viewcode-back" href="../api_clean.html#clean.clean_data">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">clean_data</span><span class="p">(</span><span class="n">html</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse raw survey HTML and return normalized applicant records.</span>
+
+<span class="sd">    The parser extracts core row values and enriches each record with optional</span>
+<span class="sd">    attributes discovered in follow-up detail rows.</span>
+
+<span class="sd">    :param html: Raw HTML content containing survey table rows.</span>
+<span class="sd">    :type html: str</span>
+<span class="sd">    :return: List of normalized applicant dictionaries.</span>
+<span class="sd">    :rtype: list[dict]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="s2">&quot;html.parser&quot;</span><span class="p">)</span>
     <span class="n">last_row</span> <span class="o">=</span> <span class="kc">None</span>

@@ -1,3 +1,5 @@
+"""Database-flow tests for pull-data insertion and deduplication semantics."""
+
 import pytest
 
 import app as flask_app_module
@@ -5,6 +7,7 @@ import app as flask_app_module
 
 @pytest.fixture()
 def app():
+    """Create a test Flask app with pull-worker state reset."""
     flask_app = flask_app_module.create_app()
     flask_app.config["TESTING"] = True
     flask_app_module.PULL_DATA_PROCESS = None
@@ -13,11 +16,13 @@ def app():
 
 @pytest.fixture()
 def client(app):
+    """Create a test client for database-flow endpoint testing."""
     return app.test_client()
 
 
 @pytest.mark.db
 def test_pull_data_inserts_new_rows_with_required_fields(client, monkeypatch):
+    """Ensure pull-data inserts rows with required non-empty schema fields."""
     # create a fake scraped input row
     fake_rows = [
         {
@@ -118,6 +123,7 @@ def test_pull_data_inserts_new_rows_with_required_fields(client, monkeypatch):
 
 @pytest.mark.db
 def test_pull_data_is_idempotent_for_duplicate_rows_by_url(client, monkeypatch):
+    """Ensure repeated pull-data calls do not insert duplicate URLs."""
     # create a fake scraped input row
     fake_rows = [
         {
@@ -244,6 +250,7 @@ def test_pull_data_is_idempotent_for_duplicate_rows_by_url(client, monkeypatch):
 
 @pytest.mark.db
 def test_simple_query_returns_dict_with_expected_schema_keys(client, monkeypatch):
+    """Ensure a fetched row dictionary contains the expected schema key set."""
     # create a fake scraped input row
     fake_rows = [
         {

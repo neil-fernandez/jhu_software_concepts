@@ -1,0 +1,516 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>test_app &mdash; module_4 assignment 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            module_4 assignment
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview_setup.html">Overview and Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operational_notes.html">Operational Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testing_guide.html">Testing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../publishing.html">Build and Publish Docs (GitHub)</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">module_4 assignment</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">test_app</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for test_app</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Integration tests for Flask app orchestration and startup behavior.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">runpy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">types</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">flask</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">app</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">flask_app_module</span>
+
+
+<div class="viewcode-block" id="test_pull_data_busy_states">
+<a class="viewcode-back" href="../api_tests.html#test_app.test_pull_data_busy_states">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">integration</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_pull_data_busy_states</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate pull-worker busy detection for none, running, and done states.&quot;&quot;&quot;</span>
+    <span class="c1"># test pull_data_busy returns expected status for None, running, done</span>
+    <span class="c1"># when no process exists</span>
+    <span class="n">flask_app_module</span><span class="o">.</span><span class="n">PULL_DATA_PROCESS</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">assert</span> <span class="n">flask_app_module</span><span class="o">.</span><span class="n">pull_data_busy</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">False</span>
+
+    <span class="c1"># when process is still running</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">FakeRunningProcess</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">poll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">running</span> <span class="o">=</span> <span class="n">FakeRunningProcess</span><span class="p">()</span>
+    <span class="n">flask_app_module</span><span class="o">.</span><span class="n">PULL_DATA_PROCESS</span> <span class="o">=</span> <span class="n">running</span>
+    <span class="k">assert</span> <span class="n">flask_app_module</span><span class="o">.</span><span class="n">pull_data_busy</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">True</span>
+    <span class="k">assert</span> <span class="n">flask_app_module</span><span class="o">.</span><span class="n">PULL_DATA_PROCESS</span> <span class="ow">is</span> <span class="n">running</span>
+
+    <span class="c1"># when process has finished</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">FakeDoneProcess</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">poll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="n">flask_app_module</span><span class="o">.</span><span class="n">PULL_DATA_PROCESS</span> <span class="o">=</span> <span class="n">FakeDoneProcess</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">flask_app_module</span><span class="o">.</span><span class="n">pull_data_busy</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">False</span>
+    <span class="k">assert</span> <span class="n">flask_app_module</span><span class="o">.</span><span class="n">PULL_DATA_PROCESS</span> <span class="ow">is</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="test_start_pull_worker_sets_process">
+<a class="viewcode-back" href="../api_tests.html#test_app.test_start_pull_worker_sets_process">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">integration</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_start_pull_worker_sets_process</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure starting the worker stores the launched process handle.&quot;&quot;&quot;</span>
+    <span class="c1"># test start_pull_worker launches subprocess and stores handle</span>
+    <span class="n">captured</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_popen</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">captured</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="k">return</span> <span class="s2">&quot;process&quot;</span>
+
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="o">.</span><span class="n">subprocess</span><span class="p">,</span> <span class="s2">&quot;Popen&quot;</span><span class="p">,</span> <span class="n">fake_popen</span><span class="p">)</span>
+    <span class="n">flask_app_module</span><span class="o">.</span><span class="n">PULL_DATA_PROCESS</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">flask_app_module</span><span class="o">.</span><span class="n">start_pull_worker</span><span class="p">()</span>
+
+    <span class="k">assert</span> <span class="n">captured</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="n">flask_app_module</span><span class="o">.</span><span class="vm">__file__</span><span class="p">,</span> <span class="s2">&quot;--run-pull-job&quot;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">flask_app_module</span><span class="o">.</span><span class="n">PULL_DATA_PROCESS</span> <span class="o">==</span> <span class="s2">&quot;process&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="test_run_pull_job_calls_dependencies">
+<a class="viewcode-back" href="../api_tests.html#test_app.test_run_pull_job_calls_dependencies">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">integration</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_run_pull_job_calls_dependencies</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure pull-job workflow calls scrape, save, and load in sequence.&quot;&quot;&quot;</span>
+    <span class="c1"># test run_pull_job calls scrape, save, and load with expected inputs</span>
+    <span class="n">captured</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;saved&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;loaded&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;row&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_scrape_data</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">max_pages</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">url</span> <span class="o">==</span> <span class="s2">&quot;https://www.thegradcafe.com/survey/&quot;</span>
+        <span class="k">assert</span> <span class="n">max_pages</span> <span class="o">==</span> <span class="mi">5</span>
+        <span class="k">return</span> <span class="n">rows</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_save_data</span><span class="p">(</span><span class="n">saved_rows</span><span class="p">,</span> <span class="n">outputfile</span><span class="p">):</span>
+        <span class="n">captured</span><span class="p">[</span><span class="s2">&quot;saved&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">saved_rows</span><span class="p">,</span> <span class="n">outputfile</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_load</span><span class="p">(</span><span class="n">sourcefile</span><span class="p">):</span>
+        <span class="n">captured</span><span class="p">[</span><span class="s2">&quot;loaded&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sourcefile</span>
+
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="o">.</span><span class="n">sd</span><span class="p">,</span> <span class="s2">&quot;scrape_data&quot;</span><span class="p">,</span> <span class="n">fake_scrape_data</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="o">.</span><span class="n">sd</span><span class="p">,</span> <span class="s2">&quot;save_data&quot;</span><span class="p">,</span> <span class="n">fake_save_data</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="o">.</span><span class="n">ld</span><span class="p">,</span> <span class="s2">&quot;load&quot;</span><span class="p">,</span> <span class="n">fake_load</span><span class="p">)</span>
+
+    <span class="n">flask_app_module</span><span class="o">.</span><span class="n">run_pull_job</span><span class="p">()</span>
+
+    <span class="k">assert</span> <span class="n">captured</span><span class="p">[</span><span class="s2">&quot;saved&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="s2">&quot;new_only.json&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">captured</span><span class="p">[</span><span class="s2">&quot;loaded&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;new_only.json&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="test_perform_update_analysis_clears_cache">
+<a class="viewcode-back" href="../api_tests.html#test_app.test_perform_update_analysis_clears_cache">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">integration</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_perform_update_analysis_clears_cache</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure analysis cache reset empties stored results.&quot;&quot;&quot;</span>
+    <span class="c1"># test perform_update_analysis clears cached query results</span>
+    <span class="n">flask_app_module</span><span class="o">.</span><span class="n">LAST_RESULTS</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">&quot;cached&quot;</span><span class="p">,</span> <span class="s2">&quot;Answer: &quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">)]</span>
+    <span class="n">flask_app_module</span><span class="o">.</span><span class="n">perform_update_analysis</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">flask_app_module</span><span class="o">.</span><span class="n">LAST_RESULTS</span> <span class="o">==</span> <span class="p">[]</span></div>
+
+
+
+<div class="viewcode-block" id="test_get_db_connection_uses_database_url">
+<a class="viewcode-back" href="../api_tests.html#test_app.test_get_db_connection_uses_database_url">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">integration</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_get_db_connection_uses_database_url</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure ``DATABASE_URL`` is used when positional connect arg is supported.&quot;&quot;&quot;</span>
+    <span class="c1"># test get_db_connection prefers DATABASE_URL when set</span>
+    <span class="n">captured</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_connect</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">captured</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="n">captured</span><span class="p">[</span><span class="s2">&quot;kwargs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="k">return</span> <span class="s2">&quot;connection&quot;</span>
+
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setenv</span><span class="p">(</span><span class="s2">&quot;DATABASE_URL&quot;</span><span class="p">,</span> <span class="s2">&quot;postgresql://example/testdb&quot;</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="o">.</span><span class="n">psycopg</span><span class="p">,</span> <span class="s2">&quot;connect&quot;</span><span class="p">,</span> <span class="n">fake_connect</span><span class="p">)</span>
+
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">flask_app_module</span><span class="o">.</span><span class="n">get_db_connection</span><span class="p">()</span>
+
+    <span class="k">assert</span> <span class="n">conn</span> <span class="o">==</span> <span class="s2">&quot;connection&quot;</span>
+    <span class="k">assert</span> <span class="n">captured</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;postgresql://example/testdb&quot;</span>
+    <span class="k">assert</span> <span class="n">captured</span><span class="p">[</span><span class="s2">&quot;kwargs&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="p">{}</span></div>
+
+
+
+<div class="viewcode-block" id="test_get_db_connection_uses_database_url_conninfo">
+<a class="viewcode-back" href="../api_tests.html#test_app.test_get_db_connection_uses_database_url_conninfo">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">integration</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_get_db_connection_uses_database_url_conninfo</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure ``DATABASE_URL`` is passed as ``conninfo`` when required.&quot;&quot;&quot;</span>
+    <span class="c1"># test get_db_connection uses conninfo path when connect has no positional value arg</span>
+    <span class="n">captured</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_connect</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">captured</span><span class="p">[</span><span class="s2">&quot;kwargs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="k">return</span> <span class="s2">&quot;connection&quot;</span>
+
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setenv</span><span class="p">(</span><span class="s2">&quot;DATABASE_URL&quot;</span><span class="p">,</span> <span class="s2">&quot;postgresql://example/testdb&quot;</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="o">.</span><span class="n">psycopg</span><span class="p">,</span> <span class="s2">&quot;connect&quot;</span><span class="p">,</span> <span class="n">fake_connect</span><span class="p">)</span>
+
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">flask_app_module</span><span class="o">.</span><span class="n">get_db_connection</span><span class="p">()</span>
+
+    <span class="k">assert</span> <span class="n">conn</span> <span class="o">==</span> <span class="s2">&quot;connection&quot;</span>
+    <span class="k">assert</span> <span class="n">captured</span><span class="p">[</span><span class="s2">&quot;kwargs&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="p">{</span><span class="s2">&quot;conninfo&quot;</span><span class="p">:</span> <span class="s2">&quot;postgresql://example/testdb&quot;</span><span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="test_get_db_connection_uses_default">
+<a class="viewcode-back" href="../api_tests.html#test_app.test_get_db_connection_uses_default">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">integration</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_get_db_connection_uses_default</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure default local database settings are used without ``DATABASE_URL``.&quot;&quot;&quot;</span>
+    <span class="c1"># test get_db_connection falls back to default connection settings</span>
+    <span class="n">captured</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_connect</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">captured</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="n">captured</span><span class="p">[</span><span class="s2">&quot;kwargs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="k">return</span> <span class="s2">&quot;connection&quot;</span>
+
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">delenv</span><span class="p">(</span><span class="s2">&quot;DATABASE_URL&quot;</span><span class="p">,</span> <span class="n">raising</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="o">.</span><span class="n">psycopg</span><span class="p">,</span> <span class="s2">&quot;connect&quot;</span><span class="p">,</span> <span class="n">fake_connect</span><span class="p">)</span>
+
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">flask_app_module</span><span class="o">.</span><span class="n">get_db_connection</span><span class="p">()</span>
+
+    <span class="k">assert</span> <span class="n">conn</span> <span class="o">==</span> <span class="s2">&quot;connection&quot;</span>
+    <span class="k">assert</span> <span class="n">captured</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
+    <span class="k">assert</span> <span class="n">captured</span><span class="p">[</span><span class="s2">&quot;kwargs&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="p">{</span><span class="s2">&quot;dbname&quot;</span><span class="p">:</span> <span class="s2">&quot;studentCourses&quot;</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="s2">&quot;postgres&quot;</span><span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="test_index_uses_cached_results_when_skip_queries">
+<a class="viewcode-back" href="../api_tests.html#test_app.test_index_uses_cached_results_when_skip_queries">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">integration</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_index_uses_cached_results_when_skip_queries</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure index view returns cached results when query execution is skipped.&quot;&quot;&quot;</span>
+    <span class="c1"># test index returns cached results when skip_queries=1</span>
+    <span class="n">flask_app_module</span><span class="o">.</span><span class="n">LAST_RESULTS</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">&quot;cached&quot;</span><span class="p">,</span> <span class="s2">&quot;Answer: &quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">)]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_render_template</span><span class="p">(</span><span class="n">_name</span><span class="p">,</span> <span class="o">**</span><span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">context</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fail_connection</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s2">&quot;DB should not be called when cache is used.&quot;</span><span class="p">)</span>
+
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="p">,</span> <span class="s2">&quot;render_template&quot;</span><span class="p">,</span> <span class="n">fake_render_template</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="p">,</span> <span class="s2">&quot;get_db_connection&quot;</span><span class="p">,</span> <span class="n">fail_connection</span><span class="p">)</span>
+
+    <span class="n">app</span> <span class="o">=</span> <span class="n">flask_app_module</span><span class="o">.</span><span class="n">create_app</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">(</span><span class="s2">&quot;/analysis?skip_queries=1&quot;</span><span class="p">):</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="n">flask_app_module</span><span class="o">.</span><span class="n">index</span><span class="p">()</span>
+
+    <span class="k">assert</span> <span class="n">context</span><span class="p">[</span><span class="s2">&quot;results&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">flask_app_module</span><span class="o">.</span><span class="n">LAST_RESULTS</span></div>
+
+
+
+<div class="viewcode-block" id="test_index_queries_and_formats_results">
+<a class="viewcode-back" href="../api_tests.html#test_app.test_index_queries_and_formats_results">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">integration</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_index_queries_and_formats_results</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure index view executes queries and formats row variants correctly.&quot;&quot;&quot;</span>
+    <span class="c1"># test index executes queries and formats results for multi, single, and None rows</span>
+    <span class="n">flask_app_module</span><span class="o">.</span><span class="n">LAST_RESULTS</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">fake_queries</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s2">&quot;Multi&quot;</span><span class="p">,</span> <span class="s2">&quot;Answer: &quot;</span><span class="p">,</span> <span class="s2">&quot;SELECT multi&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;Single&quot;</span><span class="p">,</span> <span class="s2">&quot;Answer: &quot;</span><span class="p">,</span> <span class="s2">&quot;SELECT single&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;None&quot;</span><span class="p">,</span> <span class="s2">&quot;Answer: &quot;</span><span class="p">,</span> <span class="s2">&quot;SELECT none&quot;</span><span class="p">),</span>
+    <span class="p">]</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">FakeCursor</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_result</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">):</span>
+            <span class="k">if</span> <span class="s2">&quot;multi&quot;</span> <span class="ow">in</span> <span class="n">query</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_result</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;3.85&quot;</span><span class="p">,</span> <span class="s2">&quot;327.50&quot;</span><span class="p">,</span> <span class="s2">&quot;163.50&quot;</span><span class="p">,</span> <span class="s2">&quot;4.25&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="s2">&quot;single&quot;</span> <span class="ow">in</span> <span class="n">query</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_result</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;50.00&quot;</span><span class="p">,)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_result</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">fetchone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc</span><span class="p">,</span> <span class="n">tb</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">FakeConnection</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">cursor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">FakeCursor</span><span class="p">()</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc</span><span class="p">,</span> <span class="n">tb</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_render_template</span><span class="p">(</span><span class="n">_name</span><span class="p">,</span> <span class="o">**</span><span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">context</span>
+
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="o">.</span><span class="n">qd</span><span class="p">,</span> <span class="s2">&quot;QUERIES&quot;</span><span class="p">,</span> <span class="n">fake_queries</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="p">,</span> <span class="s2">&quot;get_db_connection&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">FakeConnection</span><span class="p">())</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="p">,</span> <span class="s2">&quot;render_template&quot;</span><span class="p">,</span> <span class="n">fake_render_template</span><span class="p">)</span>
+
+    <span class="n">app</span> <span class="o">=</span> <span class="n">flask_app_module</span><span class="o">.</span><span class="n">create_app</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">(</span><span class="s2">&quot;/analysis&quot;</span><span class="p">):</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="n">flask_app_module</span><span class="o">.</span><span class="n">index</span><span class="p">()</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="s2">&quot;results&quot;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;GPA: 3.85, GRE: 327.50, GRE V: 163.50, GRE AW: 4.25&quot;</span>
+    <span class="k">assert</span> <span class="n">results</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;50.00&quot;</span>
+    <span class="k">assert</span> <span class="n">results</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="test_pull_data_route_busy_and_ok">
+<a class="viewcode-back" href="../api_tests.html#test_app.test_pull_data_route_busy_and_ok">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">integration</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_pull_data_route_busy_and_ok</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure pull-data route returns expected statuses for busy and idle states.&quot;&quot;&quot;</span>
+    <span class="c1"># test pull_data returns 409 when busy and 200 when not busy</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">flask_app_module</span><span class="o">.</span><span class="n">create_app</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="p">,</span> <span class="s2">&quot;pull_data_busy&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">response_busy</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/pull-data&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">response_busy</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">409</span>
+    <span class="k">assert</span> <span class="n">response_busy</span><span class="o">.</span><span class="n">get_json</span><span class="p">()</span> <span class="o">==</span> <span class="p">{</span><span class="s2">&quot;ok&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;busy&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+
+    <span class="n">called</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_start_pull_worker</span><span class="p">():</span>
+        <span class="n">called</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="p">,</span> <span class="s2">&quot;pull_data_busy&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="p">,</span> <span class="s2">&quot;start_pull_worker&quot;</span><span class="p">,</span> <span class="n">fake_start_pull_worker</span><span class="p">)</span>
+    <span class="n">response_ok</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/pull-data&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">response_ok</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+    <span class="k">assert</span> <span class="n">response_ok</span><span class="o">.</span><span class="n">get_json</span><span class="p">()</span> <span class="o">==</span> <span class="p">{</span><span class="s2">&quot;ok&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;busy&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+    <span class="k">assert</span> <span class="n">called</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span></div>
+
+
+
+<div class="viewcode-block" id="test_update_analysis_route_busy_and_ok">
+<a class="viewcode-back" href="../api_tests.html#test_app.test_update_analysis_route_busy_and_ok">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">integration</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_update_analysis_route_busy_and_ok</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure update-analysis route returns expected statuses for busy and idle states.&quot;&quot;&quot;</span>
+    <span class="c1"># test update_analysis returns 409 when busy and 200 when not busy</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">flask_app_module</span><span class="o">.</span><span class="n">create_app</span><span class="p">()</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="p">,</span> <span class="s2">&quot;pull_data_busy&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">response_busy</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/update-analysis&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">response_busy</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">409</span>
+    <span class="k">assert</span> <span class="n">response_busy</span><span class="o">.</span><span class="n">get_json</span><span class="p">()</span> <span class="o">==</span> <span class="p">{</span><span class="s2">&quot;ok&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;busy&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+
+    <span class="n">called</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;update&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_perform_update_analysis</span><span class="p">():</span>
+        <span class="n">called</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="p">,</span> <span class="s2">&quot;pull_data_busy&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="p">,</span> <span class="s2">&quot;perform_update_analysis&quot;</span><span class="p">,</span> <span class="n">fake_perform_update_analysis</span><span class="p">)</span>
+    <span class="n">response_ok</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/update-analysis&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">response_ok</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+    <span class="k">assert</span> <span class="n">response_ok</span><span class="o">.</span><span class="n">get_json</span><span class="p">()</span> <span class="o">==</span> <span class="p">{</span><span class="s2">&quot;ok&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;busy&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+    <span class="k">assert</span> <span class="n">called</span><span class="p">[</span><span class="s2">&quot;update&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span></div>
+
+
+
+<div class="viewcode-block" id="test_create_app_registers_routes">
+<a class="viewcode-back" href="../api_tests.html#test_app.test_create_app_registers_routes">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">integration</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_create_app_registers_routes</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure app factory registers all required routes.&quot;&quot;&quot;</span>
+    <span class="c1"># test create_app registers expected routes</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">flask_app_module</span><span class="o">.</span><span class="n">create_app</span><span class="p">()</span>
+    <span class="n">routes</span> <span class="o">=</span> <span class="p">{</span><span class="n">rule</span><span class="o">.</span><span class="n">rule</span><span class="p">:</span> <span class="n">rule</span><span class="o">.</span><span class="n">methods</span> <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">app</span><span class="o">.</span><span class="n">url_map</span><span class="o">.</span><span class="n">iter_rules</span><span class="p">()}</span>
+    <span class="k">assert</span> <span class="s2">&quot;/&quot;</span> <span class="ow">in</span> <span class="n">routes</span>
+    <span class="k">assert</span> <span class="s2">&quot;/analysis&quot;</span> <span class="ow">in</span> <span class="n">routes</span>
+    <span class="k">assert</span> <span class="s2">&quot;/pull-data&quot;</span> <span class="ow">in</span> <span class="n">routes</span>
+    <span class="k">assert</span> <span class="s2">&quot;/update-analysis&quot;</span> <span class="ow">in</span> <span class="n">routes</span></div>
+
+
+
+<div class="viewcode-block" id="test_main_run_pull_job_branch">
+<a class="viewcode-back" href="../api_tests.html#test_app.test_main_run_pull_job_branch">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">integration</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_main_run_pull_job_branch</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure ``app`` main module executes pull-job branch and exits cleanly.&quot;&quot;&quot;</span>
+    <span class="c1"># test __main__ run-pull-job branch executes and exits</span>
+    <span class="n">fake_load_data</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">ModuleType</span><span class="p">(</span><span class="s2">&quot;load_data&quot;</span><span class="p">)</span>
+    <span class="n">fake_scrape</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">ModuleType</span><span class="p">(</span><span class="s2">&quot;scrape&quot;</span><span class="p">)</span>
+    <span class="n">fake_query_data</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">ModuleType</span><span class="p">(</span><span class="s2">&quot;query_data&quot;</span><span class="p">)</span>
+    <span class="n">fake_query_data</span><span class="o">.</span><span class="n">QUERIES</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">captured</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;saved&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;loaded&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_scrape_data</span><span class="p">(</span><span class="n">_url</span><span class="p">,</span> <span class="n">max_pages</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">max_pages</span> <span class="o">==</span> <span class="mi">5</span>
+        <span class="k">return</span> <span class="p">[{</span><span class="s2">&quot;row&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_save_data</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">outputfile</span><span class="p">):</span>
+        <span class="n">captured</span><span class="p">[</span><span class="s2">&quot;saved&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">outputfile</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_load</span><span class="p">(</span><span class="n">sourcefile</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">captured</span><span class="p">[</span><span class="s2">&quot;loaded&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">sourcefile</span><span class="p">,</span> <span class="n">reset</span><span class="p">)</span>
+
+    <span class="n">fake_scrape</span><span class="o">.</span><span class="n">scrape_data</span> <span class="o">=</span> <span class="n">fake_scrape_data</span>
+    <span class="n">fake_scrape</span><span class="o">.</span><span class="n">save_data</span> <span class="o">=</span> <span class="n">fake_save_data</span>
+    <span class="n">fake_load_data</span><span class="o">.</span><span class="n">load</span> <span class="o">=</span> <span class="n">fake_load</span>
+
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setitem</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">,</span> <span class="s2">&quot;load_data&quot;</span><span class="p">,</span> <span class="n">fake_load_data</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setitem</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">,</span> <span class="s2">&quot;scrape&quot;</span><span class="p">,</span> <span class="n">fake_scrape</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setitem</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">,</span> <span class="s2">&quot;query_data&quot;</span><span class="p">,</span> <span class="n">fake_query_data</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">sys</span><span class="p">,</span> <span class="s2">&quot;argv&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;app.py&quot;</span><span class="p">,</span> <span class="s2">&quot;--run-pull-job&quot;</span><span class="p">])</span>
+
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">SystemExit</span><span class="p">):</span>
+        <span class="n">runpy</span><span class="o">.</span><span class="n">run_module</span><span class="p">(</span><span class="s2">&quot;app&quot;</span><span class="p">,</span> <span class="n">run_name</span><span class="o">=</span><span class="s2">&quot;__main__&quot;</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">captured</span><span class="p">[</span><span class="s2">&quot;saved&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;new_only.json&quot;</span>
+    <span class="k">assert</span> <span class="n">captured</span><span class="p">[</span><span class="s2">&quot;loaded&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;new_only.json&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="test_main_default_branch_runs_load_and_server">
+<a class="viewcode-back" href="../api_tests.html#test_app.test_main_default_branch_runs_load_and_server">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">integration</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_main_default_branch_runs_load_and_server</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure default main branch loads seed data and starts Flask server.&quot;&quot;&quot;</span>
+    <span class="c1"># test __main__ default branch loads data and starts server</span>
+    <span class="n">fake_load_data</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">ModuleType</span><span class="p">(</span><span class="s2">&quot;load_data&quot;</span><span class="p">)</span>
+    <span class="n">fake_query_data</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">ModuleType</span><span class="p">(</span><span class="s2">&quot;query_data&quot;</span><span class="p">)</span>
+    <span class="n">fake_scrape</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">ModuleType</span><span class="p">(</span><span class="s2">&quot;scrape&quot;</span><span class="p">)</span>
+    <span class="n">fake_query_data</span><span class="o">.</span><span class="n">QUERIES</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">captured</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;loaded&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;run&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_load</span><span class="p">(</span><span class="n">sourcefile</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">captured</span><span class="p">[</span><span class="s2">&quot;loaded&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">sourcefile</span><span class="p">,</span> <span class="n">reset</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">captured</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">debug</span><span class="p">)</span>
+
+    <span class="n">fake_load_data</span><span class="o">.</span><span class="n">load</span> <span class="o">=</span> <span class="n">fake_load</span>
+
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setitem</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">,</span> <span class="s2">&quot;load_data&quot;</span><span class="p">,</span> <span class="n">fake_load_data</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setitem</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">,</span> <span class="s2">&quot;query_data&quot;</span><span class="p">,</span> <span class="n">fake_query_data</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setitem</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">,</span> <span class="s2">&quot;scrape&quot;</span><span class="p">,</span> <span class="n">fake_scrape</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">sys</span><span class="p">,</span> <span class="s2">&quot;argv&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;app.py&quot;</span><span class="p">])</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">,</span> <span class="s2">&quot;run&quot;</span><span class="p">,</span> <span class="n">fake_run</span><span class="p">)</span>
+
+    <span class="n">runpy</span><span class="o">.</span><span class="n">run_module</span><span class="p">(</span><span class="s2">&quot;app&quot;</span><span class="p">,</span> <span class="n">run_name</span><span class="o">=</span><span class="s2">&quot;__main__&quot;</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">captured</span><span class="p">[</span><span class="s2">&quot;loaded&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="s2">&quot;llm_extend_applicant_data.json&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">captured</span><span class="p">[</span><span class="s2">&quot;run&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="s2">&quot;0.0.0.0&quot;</span><span class="p">,</span> <span class="mi">8080</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Neil Fernandez.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

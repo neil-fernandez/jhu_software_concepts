@@ -12,6 +12,11 @@ build:
 # Set the OS, Python version, and other tools you might need
 sphinx:
   configuration: docs/source/conf.py
+  fail_on_warning: true
+
+formats:
+  - htmlzip
+  - pdf
 
 python:
   install:

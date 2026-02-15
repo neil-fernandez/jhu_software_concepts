@@ -1,0 +1,241 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>test_scrape &mdash; module_4 assignment 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            module_4 assignment
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview_setup.html">Overview and Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operational_notes.html">Operational Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testing_guide.html">Testing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../publishing.html">Build and Publish Docs (GitHub)</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">module_4 assignment</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">test_scrape</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for test_scrape</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Integration tests for scraping URL normalization, filtering, and persistence.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">builtins</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">scrape</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">scrape_module</span>
+
+
+<div class="viewcode-block" id="test_normalise_url_handles_empty_and_trailing_slash">
+<a class="viewcode-back" href="../api_tests.html#test_scrape.test_normalise_url_handles_empty_and_trailing_slash">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">integration</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_normalise_url_handles_empty_and_trailing_slash</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure URL normalization handles empty input and strips trailing slashes.&quot;&quot;&quot;</span>
+    <span class="c1"># test normalise_url returns None for empty values and strips trailing slashes</span>
+    <span class="k">assert</span> <span class="n">scrape_module</span><span class="o">.</span><span class="n">normalise_url</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
+    <span class="k">assert</span> <span class="n">scrape_module</span><span class="o">.</span><span class="n">normalise_url</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
+    <span class="k">assert</span> <span class="n">scrape_module</span><span class="o">.</span><span class="n">normalise_url</span><span class="p">(</span><span class="s2">&quot; https://example.com/path/ &quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;https://example.com/path&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="test_get_existing_urls_normalises_and_filters">
+<a class="viewcode-back" href="../api_tests.html#test_scrape.test_get_existing_urls_normalises_and_filters">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">integration</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_get_existing_urls_normalises_and_filters</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure existing URL retrieval filters null/empty values and normalizes output.&quot;&quot;&quot;</span>
+    <span class="c1"># test get_existing_urls normalises urls and skips null/empty values</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">FakeCursor</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_query</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">fetchall</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span>
+                <span class="p">(</span><span class="s2">&quot;https://example.com/a/&quot;</span><span class="p">,),</span>
+                <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,),</span>
+                <span class="p">(</span><span class="kc">None</span><span class="p">,),</span>
+                <span class="p">(</span><span class="s2">&quot;https://example.com/b&quot;</span><span class="p">,),</span>
+            <span class="p">]</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc</span><span class="p">,</span> <span class="n">tb</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">FakeConnection</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">cursor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">FakeCursor</span><span class="p">()</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc</span><span class="p">,</span> <span class="n">tb</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">scrape_module</span><span class="o">.</span><span class="n">psycopg</span><span class="p">,</span> <span class="s2">&quot;connect&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="o">**</span><span class="n">_kwargs</span><span class="p">:</span> <span class="n">FakeConnection</span><span class="p">())</span>
+
+    <span class="n">urls</span> <span class="o">=</span> <span class="n">scrape_module</span><span class="o">.</span><span class="n">get_existing_urls</span><span class="p">()</span>
+
+    <span class="k">assert</span> <span class="n">urls</span> <span class="o">==</span> <span class="p">{</span><span class="s2">&quot;https://example.com/a&quot;</span><span class="p">,</span> <span class="s2">&quot;https://example.com/b&quot;</span><span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="test_scrape_data_filters_seen_urls_and_decodes">
+<a class="viewcode-back" href="../api_tests.html#test_scrape.test_scrape_data_filters_seen_urls_and_decodes">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">integration</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_scrape_data_filters_seen_urls_and_decodes</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure scraping skips seen URLs and handles decode fallback behavior.&quot;&quot;&quot;</span>
+    <span class="c1"># test scrape_data decodes latin-1 fallback and skips seen urls</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">FakeResponse</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">FakePoolManager</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_method</span><span class="p">,</span> <span class="n">page_url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">retries</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">page_url</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;?page=2&quot;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">FakeResponse</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;two&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">FakeResponse</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;</span><span class="se">\xff</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_clean_data</span><span class="p">(</span><span class="n">_html</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="p">{</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://example.com/keep/&quot;</span><span class="p">},</span>
+            <span class="p">{</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://example.com/seen/&quot;</span><span class="p">},</span>
+            <span class="p">{</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">},</span>
+        <span class="p">]</span>
+
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">scrape_module</span><span class="p">,</span> <span class="s2">&quot;get_existing_urls&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;https://example.com/seen&quot;</span><span class="p">})</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">scrape_module</span><span class="o">.</span><span class="n">urllib3</span><span class="p">,</span> <span class="s2">&quot;PoolManager&quot;</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">FakePoolManager</span><span class="p">())</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">scrape_module</span><span class="p">,</span> <span class="s2">&quot;clean_data&quot;</span><span class="p">,</span> <span class="n">fake_clean_data</span><span class="p">)</span>
+
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">scrape_module</span><span class="o">.</span><span class="n">scrape_data</span><span class="p">(</span><span class="s2">&quot;https://example.com/survey&quot;</span><span class="p">,</span> <span class="n">max_pages</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="k">assert</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;url&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;https://example.com/keep&quot;</span>
+    <span class="k">assert</span> <span class="n">rows</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;url&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;https://example.com/keep&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="test_save_data_writes_json_and_prints">
+<a class="viewcode-back" href="../api_tests.html#test_scrape.test_save_data_writes_json_and_prints">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">integration</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_save_data_writes_json_and_prints</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">,</span> <span class="n">capsys</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure saving rows writes JSON and reports saved row count.&quot;&quot;&quot;</span>
+    <span class="c1"># test save_data writes json and prints saved count</span>
+    <span class="n">buffer</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_open</span><span class="p">(</span><span class="n">_path</span><span class="p">,</span> <span class="n">_mode</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">buffer</span>
+
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">builtins</span><span class="p">,</span> <span class="s2">&quot;open&quot;</span><span class="p">,</span> <span class="n">fake_open</span><span class="p">)</span>
+
+    <span class="n">scrape_module</span><span class="o">.</span><span class="n">save_data</span><span class="p">([{</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;u1&quot;</span><span class="p">}],</span> <span class="s2">&quot;out.json&quot;</span><span class="p">)</span>
+    <span class="n">captured</span> <span class="o">=</span> <span class="n">capsys</span><span class="o">.</span><span class="n">readouterr</span><span class="p">()</span><span class="o">.</span><span class="n">out</span>
+    <span class="k">assert</span> <span class="s2">&quot;Saved 1 rows to out.json&quot;</span> <span class="ow">in</span> <span class="n">captured</span></div>
+
+
+
+<div class="viewcode-block" id="test_save_data_handles_empty_rows">
+<a class="viewcode-back" href="../api_tests.html#test_scrape.test_save_data_handles_empty_rows">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">integration</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_save_data_handles_empty_rows</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">,</span> <span class="n">capsys</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure saving empty rows reports zero saved records.&quot;&quot;&quot;</span>
+    <span class="c1"># test save_data handles empty rows and prints zero count</span>
+    <span class="n">buffer</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_open</span><span class="p">(</span><span class="n">_path</span><span class="p">,</span> <span class="n">_mode</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">buffer</span>
+
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">builtins</span><span class="p">,</span> <span class="s2">&quot;open&quot;</span><span class="p">,</span> <span class="n">fake_open</span><span class="p">)</span>
+
+    <span class="n">scrape_module</span><span class="o">.</span><span class="n">save_data</span><span class="p">([],</span> <span class="s2">&quot;out.json&quot;</span><span class="p">)</span>
+    <span class="n">captured</span> <span class="o">=</span> <span class="n">capsys</span><span class="o">.</span><span class="n">readouterr</span><span class="p">()</span><span class="o">.</span><span class="n">out</span>
+    <span class="k">assert</span> <span class="s2">&quot;Saved 0 rows to out.json&quot;</span> <span class="ow">in</span> <span class="n">captured</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Neil Fernandez.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

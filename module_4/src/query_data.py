@@ -1,8 +1,7 @@
-"""
-This module contains declarations for all the sql queries,
-the structured output to render on the website and to output
-to console, and it contains a main declaration to run the
-script directly for testing purposes.
+"""SQL query definitions used by the analytics view and CLI test output.
+
+The ``QUERIES`` constant provides ordered prompt text, output prefixes, and
+SQL statements consumed by the Flask UI and standalone execution path.
 """
 
 import psycopg

@@ -19,7 +19,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Testing Guide" href="testing_guide.html" />
+    <link rel="next" title="Test Modules" href="api_tests.html" />
     <link rel="prev" title="query_data.py" href="api_query_data.html" /> 
 </head>
 
@@ -46,6 +46,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview_setup.html">Overview and Setup</a></li>
 <li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="operational_notes.html">Operational Notes</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="api_reference.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="api_scrape.html">scrape.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api_clean.html">clean.py</a></li>
@@ -64,6 +65,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#app.create_app"><code class="docutils literal notranslate"><span class="pre">create_app()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html">Test Modules</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="testing_guide.html">Testing Guide</a></li>
@@ -99,59 +101,111 @@
 <h1>Flask App Routes (app.py)<a class="headerlink" href="#flask-app-routes-app-py" title="Link to this heading"></a></h1>
 <p>The route handlers requested as <code class="docutils literal notranslate"><span class="pre">flask_app.py</span></code> routes are implemented in
 <code class="docutils literal notranslate"><span class="pre">module_4/src/app.py</span></code>.</p>
-<p id="module-app">This Python script is used to start a local web application
-built using Flask to load the llm output, display query results,
-scrape and load new records into a postgresql database and update
-query analysis as required.</p>
+<p id="module-app">Flask application entry point for scraping, loading, and analysis views.</p>
+<p>This module wires together route handlers for query analysis display, data
+refresh operations, and background pull workflows.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="app.pull_data_busy">
 <span class="sig-prename descclassname"><span class="pre">app.</span></span><span class="sig-name descname"><span class="pre">pull_data_busy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/app.html#pull_data_busy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.pull_data_busy" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Check whether the background pull-data worker is currently running.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code> when the worker process is active, otherwise <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="app.start_pull_worker">
 <span class="sig-prename descclassname"><span class="pre">app.</span></span><span class="sig-name descname"><span class="pre">start_pull_worker</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/app.html#start_pull_worker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.start_pull_worker" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Start the pull-data workflow in a background subprocess.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="app.run_pull_job">
 <span class="sig-prename descclassname"><span class="pre">app.</span></span><span class="sig-name descname"><span class="pre">run_pull_job</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/app.html#run_pull_job"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.run_pull_job" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Scrape records, write a JSON payload, and load new rows into PostgreSQL.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="app.perform_update_analysis">
 <span class="sig-prename descclassname"><span class="pre">app.</span></span><span class="sig-name descname"><span class="pre">perform_update_analysis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/app.html#perform_update_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.perform_update_analysis" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Clear cached query output so the next analysis request recomputes results.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="app.get_db_connection">
 <span class="sig-prename descclassname"><span class="pre">app.</span></span><span class="sig-name descname"><span class="pre">get_db_connection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/app.html#get_db_connection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.get_db_connection" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Return an open PostgreSQL connection for query execution.</p>
+<p>Uses the <code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code> environment variable when available and falls
+back to local defaults when not set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Open PostgreSQL connection.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="app.index">
 <span class="sig-prename descclassname"><span class="pre">app.</span></span><span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/app.html#index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.index" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Render the analysis page with cached or freshly computed query results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Rendered HTML response for the main analysis page.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="app.pull_data">
 <span class="sig-prename descclassname"><span class="pre">app.</span></span><span class="sig-name descname"><span class="pre">pull_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/app.html#pull_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.pull_data" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Handle the pull-data endpoint and launch the background worker if idle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JSON payload and HTTP status indicating launch or busy state.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="app.update_analysis">
 <span class="sig-prename descclassname"><span class="pre">app.</span></span><span class="sig-name descname"><span class="pre">update_analysis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/app.html#update_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.update_analysis" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Handle cache reset requests for analysis output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JSON payload and HTTP status indicating reset or busy state.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="app.register_routes">
 <span class="sig-prename descclassname"><span class="pre">app.</span></span><span class="sig-name descname"><span class="pre">register_routes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flask_app</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/app.html#register_routes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.register_routes" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Register all URL routes for the Flask application.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>flask_app</strong> (<em>Flask</em>) – Application instance to configure.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="app.create_app">
 <span class="sig-prename descclassname"><span class="pre">app.</span></span><span class="sig-name descname"><span class="pre">create_app</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/app.html#create_app"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#app.create_app" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Create and configure the Flask app instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Configured Flask application.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Flask</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 
@@ -160,7 +214,7 @@ query analysis as required.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="api_query_data.html" class="btn btn-neutral float-left" title="query_data.py" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="testing_guide.html" class="btn btn-neutral float-right" title="Testing Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="api_tests.html" class="btn btn-neutral float-right" title="Test Modules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

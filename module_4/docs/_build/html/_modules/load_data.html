@@ -43,6 +43,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../overview_setup.html">Overview and Setup</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operational_notes.html">Operational Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api_reference.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../testing_guide.html">Testing Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../publishing.html">Build and Publish Docs (GitHub)</a></li>
@@ -73,11 +74,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for load_data</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">This module contains functions to load a json file into the database</span>
-<span class="sd">schema (load), clean null bytes (clean_text), and parse floats to enable</span>
-<span class="sd">load using the correct data type (parse_number).</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;Utilities to clean parsed fields and load JSON records into PostgreSQL.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
@@ -87,6 +84,12 @@
 <div class="viewcode-block" id="clean_text">
 <a class="viewcode-back" href="../api_load_data.html#load_data.clean_text">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">clean_text</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a text value with null bytes removed.</span>
+
+<span class="sd">    :param value: Input value to normalize.</span>
+<span class="sd">    :return: Normalized string value or ``None``.</span>
+<span class="sd">    :rtype: str | None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\x00</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span></div>
@@ -96,6 +99,12 @@
 <div class="viewcode-block" id="parse_number">
 <a class="viewcode-back" href="../api_load_data.html#load_data.parse_number">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">parse_number</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract and parse the first numeric token from a value.</span>
+
+<span class="sd">    :param value: Input value that may contain a numeric substring.</span>
+<span class="sd">    :return: Parsed float when found, otherwise ``None``.</span>
+<span class="sd">    :rtype: float | None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[-+]?\d*\.?\d+&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
@@ -106,6 +115,16 @@
 <div class="viewcode-block" id="load">
 <a class="viewcode-back" href="../api_load_data.html#load_data.load">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="n">sourcefile</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load applicant records from JSON into the ``applicantData`` table.</span>
+
+<span class="sd">    Supports both JSON arrays and newline-delimited JSON input.</span>
+
+<span class="sd">    :param sourcefile: Path to the source JSON file.</span>
+<span class="sd">    :type sourcefile: str</span>
+<span class="sd">    :param reset: Whether to drop and recreate the table before loading.</span>
+<span class="sd">    :type reset: bool</span>
+<span class="sd">    :return: ``None``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># open source file, detect whether it is JSON array or line delimited JSON and load into records</span>
     <span class="n">records</span> <span class="o">=</span> <span class="p">[]</span>

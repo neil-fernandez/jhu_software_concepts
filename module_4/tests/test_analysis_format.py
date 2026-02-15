@@ -1,3 +1,5 @@
+"""Tests for analysis-page answer label and percentage formatting behavior."""
+
 import pytest
 import re
 from bs4 import BeautifulSoup
@@ -7,6 +9,7 @@ import app as flask_app_module
 
 @pytest.fixture()
 def app():
+    """Create a Flask app configured for test execution."""
     flask_app = flask_app_module.create_app()
     flask_app.config["TESTING"] = True
     yield flask_app
@@ -14,11 +17,13 @@ def app():
 
 @pytest.fixture()
 def client(app):
+    """Create a test client for HTTP route checks."""
     return app.test_client()
 
 
 @pytest.mark.analysis
 def test_all_analysis_items_are_labeled_with_answer_prefix(client):
+    """Verify each rendered analysis row starts with the ``Answer:`` prefix."""
     # seed fake analysis results data directly into app cache to avoid database access
     flask_app_module.LAST_RESULTS = [
         ("How many Fall 2026 applicants are in the DB?", "Answer: Applicant count: ", "7085"),
@@ -46,6 +51,7 @@ def test_all_analysis_items_are_labeled_with_answer_prefix(client):
 
 @pytest.mark.analysis
 def test_rendered_percentages_have_two_decimal_digits(client):
+    """Verify rendered percentage metrics include exactly two decimal digits."""
     # seed fake analysis results data directly into app cache to avoid database access
     flask_app_module.LAST_RESULTS = [
         ("International percentage", "Answer: Percent International: ", "44.32%"),

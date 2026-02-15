@@ -1,3 +1,5 @@
+"""Integration tests for query definition structure and CLI output formatting."""
+
 import runpy
 import sys
 import types
@@ -9,6 +11,7 @@ import query_data as query_data_module
 
 @pytest.mark.integration
 def test_queries_list_contains_expected_items():
+    """Ensure the ``QUERIES`` container exposes valid label/prefix/SQL tuples."""
     # test QUERIES list contains expected labels, prefixes, and sql strings
     assert len(query_data_module.QUERIES) == 12
     for label, prefix, query in query_data_module.QUERIES:
@@ -20,6 +23,7 @@ def test_queries_list_contains_expected_items():
 
 @pytest.mark.integration
 def test_main_executes_queries_and_formats_output(monkeypatch, capsys):
+    """Ensure standalone query runner prints expected formatted output values."""
     # test __main__ executes queries and formats output for multi, single, and None rows
     fake_psycopg = types.ModuleType("psycopg")
 

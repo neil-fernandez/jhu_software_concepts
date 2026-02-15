@@ -20,7 +20,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="scrape.py" href="api_scrape.html" />
-    <link rel="prev" title="Architecture" href="architecture.html" /> 
+    <link rel="prev" title="Operational Notes" href="operational_notes.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -46,12 +46,14 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview_setup.html">Overview and Setup</a></li>
 <li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="operational_notes.html">Operational Notes</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="api_scrape.html">scrape.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api_clean.html">clean.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api_load_data.html">load_data.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api_query_data.html">query_data.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api_flask_routes.html">Flask App Routes (app.py)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html">Test Modules</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="testing_guide.html">Testing Guide</a></li>
@@ -118,6 +120,63 @@
 <li class="toctree-l2"><a class="reference internal" href="api_flask_routes.html#app.create_app"><code class="docutils literal notranslate"><span class="pre">create_app()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="api_tests.html">Test Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_analysis_format.app"><code class="docutils literal notranslate"><span class="pre">app()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_analysis_format.client"><code class="docutils literal notranslate"><span class="pre">client()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_analysis_format.test_all_analysis_items_are_labeled_with_answer_prefix"><code class="docutils literal notranslate"><span class="pre">test_all_analysis_items_are_labeled_with_answer_prefix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_analysis_format.test_rendered_percentages_have_two_decimal_digits"><code class="docutils literal notranslate"><span class="pre">test_rendered_percentages_have_two_decimal_digits()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_app.test_pull_data_busy_states"><code class="docutils literal notranslate"><span class="pre">test_pull_data_busy_states()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_app.test_start_pull_worker_sets_process"><code class="docutils literal notranslate"><span class="pre">test_start_pull_worker_sets_process()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_app.test_run_pull_job_calls_dependencies"><code class="docutils literal notranslate"><span class="pre">test_run_pull_job_calls_dependencies()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_app.test_perform_update_analysis_clears_cache"><code class="docutils literal notranslate"><span class="pre">test_perform_update_analysis_clears_cache()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_app.test_get_db_connection_uses_database_url"><code class="docutils literal notranslate"><span class="pre">test_get_db_connection_uses_database_url()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_app.test_get_db_connection_uses_database_url_conninfo"><code class="docutils literal notranslate"><span class="pre">test_get_db_connection_uses_database_url_conninfo()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_app.test_get_db_connection_uses_default"><code class="docutils literal notranslate"><span class="pre">test_get_db_connection_uses_default()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_app.test_index_uses_cached_results_when_skip_queries"><code class="docutils literal notranslate"><span class="pre">test_index_uses_cached_results_when_skip_queries()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_app.test_index_queries_and_formats_results"><code class="docutils literal notranslate"><span class="pre">test_index_queries_and_formats_results()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_app.test_pull_data_route_busy_and_ok"><code class="docutils literal notranslate"><span class="pre">test_pull_data_route_busy_and_ok()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_app.test_update_analysis_route_busy_and_ok"><code class="docutils literal notranslate"><span class="pre">test_update_analysis_route_busy_and_ok()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_app.test_create_app_registers_routes"><code class="docutils literal notranslate"><span class="pre">test_create_app_registers_routes()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_app.test_main_run_pull_job_branch"><code class="docutils literal notranslate"><span class="pre">test_main_run_pull_job_branch()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_app.test_main_default_branch_runs_load_and_server"><code class="docutils literal notranslate"><span class="pre">test_main_default_branch_runs_load_and_server()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_buttons.app"><code class="docutils literal notranslate"><span class="pre">app()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_buttons.client"><code class="docutils literal notranslate"><span class="pre">client()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_buttons.test_post_pull_data_returns_200"><code class="docutils literal notranslate"><span class="pre">test_post_pull_data_returns_200()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_buttons.test_post_pull_data_triggers_loader"><code class="docutils literal notranslate"><span class="pre">test_post_pull_data_triggers_loader()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_buttons.test_post_pull_data_returns_409_when_busy_and_skips_update_when_busy"><code class="docutils literal notranslate"><span class="pre">test_post_pull_data_returns_409_when_busy_and_skips_update_when_busy()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_buttons.test_post_update_analysis_returns_200_when_not_busy"><code class="docutils literal notranslate"><span class="pre">test_post_update_analysis_returns_200_when_not_busy()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_buttons.test_post_update_analysis_returns_409_and_skips_update_when_busy"><code class="docutils literal notranslate"><span class="pre">test_post_update_analysis_returns_409_and_skips_update_when_busy()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_clean.test_clean_data_parses_rows_and_details"><code class="docutils literal notranslate"><span class="pre">test_clean_data_parses_rows_and_details()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_clean.test_clean_data_returns_empty_list_when_no_rows"><code class="docutils literal notranslate"><span class="pre">test_clean_data_returns_empty_list_when_no_rows()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_db_insert.app"><code class="docutils literal notranslate"><span class="pre">app()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_db_insert.client"><code class="docutils literal notranslate"><span class="pre">client()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_db_insert.test_pull_data_inserts_new_rows_with_required_fields"><code class="docutils literal notranslate"><span class="pre">test_pull_data_inserts_new_rows_with_required_fields()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_db_insert.test_pull_data_is_idempotent_for_duplicate_rows_by_url"><code class="docutils literal notranslate"><span class="pre">test_pull_data_is_idempotent_for_duplicate_rows_by_url()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_db_insert.test_simple_query_returns_dict_with_expected_schema_keys"><code class="docutils literal notranslate"><span class="pre">test_simple_query_returns_dict_with_expected_schema_keys()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_flask_page.app"><code class="docutils literal notranslate"><span class="pre">app()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_flask_page.client"><code class="docutils literal notranslate"><span class="pre">client()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_flask_page.test_app_is_flask_instance_and_testable"><code class="docutils literal notranslate"><span class="pre">test_app_is_flask_instance_and_testable()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_flask_page.test_app_routes_are_created"><code class="docutils literal notranslate"><span class="pre">test_app_routes_are_created()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_flask_page.test_get_analysis_returns_200"><code class="docutils literal notranslate"><span class="pre">test_get_analysis_returns_200()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_flask_page.test_get_analysis_contains_page_buttons"><code class="docutils literal notranslate"><span class="pre">test_get_analysis_contains_page_buttons()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_flask_page.test_get_analysis_contains_page_content"><code class="docutils literal notranslate"><span class="pre">test_get_analysis_contains_page_content()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_integration_end_to_end.app"><code class="docutils literal notranslate"><span class="pre">app()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_integration_end_to_end.client"><code class="docutils literal notranslate"><span class="pre">client()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_integration_end_to_end.test_end_to_end_pull_update_render_flow"><code class="docutils literal notranslate"><span class="pre">test_end_to_end_pull_update_render_flow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_integration_end_to_end.test_multiple_pull_data_requests_dedupe_by_url"><code class="docutils literal notranslate"><span class="pre">test_multiple_pull_data_requests_dedupe_by_url()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_load_data.test_clean_text_and_parse_number"><code class="docutils literal notranslate"><span class="pre">test_clean_text_and_parse_number()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_load_data.test_load_reads_json_array_and_resets_table"><code class="docutils literal notranslate"><span class="pre">test_load_reads_json_array_and_resets_table()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_load_data.test_load_reads_json_lines_and_skips_blank_lines"><code class="docutils literal notranslate"><span class="pre">test_load_reads_json_lines_and_skips_blank_lines()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_load_data.test_load_handles_empty_file"><code class="docutils literal notranslate"><span class="pre">test_load_handles_empty_file()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_query_data.test_queries_list_contains_expected_items"><code class="docutils literal notranslate"><span class="pre">test_queries_list_contains_expected_items()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_query_data.test_main_executes_queries_and_formats_output"><code class="docutils literal notranslate"><span class="pre">test_main_executes_queries_and_formats_output()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_scrape.test_normalise_url_handles_empty_and_trailing_slash"><code class="docutils literal notranslate"><span class="pre">test_normalise_url_handles_empty_and_trailing_slash()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_scrape.test_get_existing_urls_normalises_and_filters"><code class="docutils literal notranslate"><span class="pre">test_get_existing_urls_normalises_and_filters()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_scrape.test_scrape_data_filters_seen_urls_and_decodes"><code class="docutils literal notranslate"><span class="pre">test_scrape_data_filters_seen_urls_and_decodes()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_scrape.test_save_data_writes_json_and_prints"><code class="docutils literal notranslate"><span class="pre">test_save_data_writes_json_and_prints()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_tests.html#test_scrape.test_save_data_handles_empty_rows"><code class="docutils literal notranslate"><span class="pre">test_save_data_handles_empty_rows()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </div>
 </section>
@@ -126,7 +185,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="architecture.html" class="btn btn-neutral float-left" title="Architecture" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="operational_notes.html" class="btn btn-neutral float-left" title="Operational Notes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="api_scrape.html" class="btn btn-neutral float-right" title="scrape.py" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

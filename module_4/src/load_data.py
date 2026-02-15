@@ -1,8 +1,4 @@
-"""
-This module contains functions to load a json file into the database
-schema (load), clean null bytes (clean_text), and parse floats to enable
-load using the correct data type (parse_number).
-"""
+"""Utilities to clean parsed fields and load JSON records into PostgreSQL."""
 
 import json
 import re
@@ -10,12 +6,24 @@ import psycopg
 
 # clean null bytes
 def clean_text(value):
+    """Return a text value with null bytes removed.
+
+    :param value: Input value to normalize.
+    :return: Normalized string value or ``None``.
+    :rtype: str | None
+    """
     if value is None:
         return None
     return str(value).replace("\x00", "")
 
 # clean float columns which may contain text
 def parse_number(value):
+    """Extract and parse the first numeric token from a value.
+
+    :param value: Input value that may contain a numeric substring.
+    :return: Parsed float when found, otherwise ``None``.
+    :rtype: float | None
+    """
     if value is None:
         return None
     match = re.search(r"[-+]?\d*\.?\d+", str(value))
@@ -23,6 +31,16 @@ def parse_number(value):
 
 # open and load json file into db schema
 def load(sourcefile, reset=False):
+    """Load applicant records from JSON into the ``applicantData`` table.
+
+    Supports both JSON arrays and newline-delimited JSON input.
+
+    :param sourcefile: Path to the source JSON file.
+    :type sourcefile: str
+    :param reset: Whether to drop and recreate the table before loading.
+    :type reset: bool
+    :return: ``None``
+    """
 
     # open source file, detect whether it is JSON array or line delimited JSON and load into records
     records = []

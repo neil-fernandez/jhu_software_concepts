@@ -1,0 +1,513 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test Modules &mdash; module_4 assignment 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=2709fde1"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Testing Guide" href="testing_guide.html" />
+    <link rel="prev" title="Flask App Routes (app.py)" href="api_flask_routes.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            module_4 assignment
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview_setup.html">Overview and Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="operational_notes.html">Operational Notes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="api_reference.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="api_scrape.html">scrape.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_clean.html">clean.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_load_data.html">load_data.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_query_data.html">query_data.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api_flask_routes.html">Flask App Routes (app.py)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Test Modules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#test_analysis_format.app"><code class="docutils literal notranslate"><span class="pre">app()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_analysis_format.client"><code class="docutils literal notranslate"><span class="pre">client()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_analysis_format.test_all_analysis_items_are_labeled_with_answer_prefix"><code class="docutils literal notranslate"><span class="pre">test_all_analysis_items_are_labeled_with_answer_prefix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_analysis_format.test_rendered_percentages_have_two_decimal_digits"><code class="docutils literal notranslate"><span class="pre">test_rendered_percentages_have_two_decimal_digits()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_app.test_pull_data_busy_states"><code class="docutils literal notranslate"><span class="pre">test_pull_data_busy_states()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_app.test_start_pull_worker_sets_process"><code class="docutils literal notranslate"><span class="pre">test_start_pull_worker_sets_process()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_app.test_run_pull_job_calls_dependencies"><code class="docutils literal notranslate"><span class="pre">test_run_pull_job_calls_dependencies()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_app.test_perform_update_analysis_clears_cache"><code class="docutils literal notranslate"><span class="pre">test_perform_update_analysis_clears_cache()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_app.test_get_db_connection_uses_database_url"><code class="docutils literal notranslate"><span class="pre">test_get_db_connection_uses_database_url()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_app.test_get_db_connection_uses_database_url_conninfo"><code class="docutils literal notranslate"><span class="pre">test_get_db_connection_uses_database_url_conninfo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_app.test_get_db_connection_uses_default"><code class="docutils literal notranslate"><span class="pre">test_get_db_connection_uses_default()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_app.test_index_uses_cached_results_when_skip_queries"><code class="docutils literal notranslate"><span class="pre">test_index_uses_cached_results_when_skip_queries()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_app.test_index_queries_and_formats_results"><code class="docutils literal notranslate"><span class="pre">test_index_queries_and_formats_results()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_app.test_pull_data_route_busy_and_ok"><code class="docutils literal notranslate"><span class="pre">test_pull_data_route_busy_and_ok()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_app.test_update_analysis_route_busy_and_ok"><code class="docutils literal notranslate"><span class="pre">test_update_analysis_route_busy_and_ok()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_app.test_create_app_registers_routes"><code class="docutils literal notranslate"><span class="pre">test_create_app_registers_routes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_app.test_main_run_pull_job_branch"><code class="docutils literal notranslate"><span class="pre">test_main_run_pull_job_branch()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_app.test_main_default_branch_runs_load_and_server"><code class="docutils literal notranslate"><span class="pre">test_main_default_branch_runs_load_and_server()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_buttons.app"><code class="docutils literal notranslate"><span class="pre">app()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_buttons.client"><code class="docutils literal notranslate"><span class="pre">client()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_buttons.test_post_pull_data_returns_200"><code class="docutils literal notranslate"><span class="pre">test_post_pull_data_returns_200()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_buttons.test_post_pull_data_triggers_loader"><code class="docutils literal notranslate"><span class="pre">test_post_pull_data_triggers_loader()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_buttons.test_post_pull_data_returns_409_when_busy_and_skips_update_when_busy"><code class="docutils literal notranslate"><span class="pre">test_post_pull_data_returns_409_when_busy_and_skips_update_when_busy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_buttons.test_post_update_analysis_returns_200_when_not_busy"><code class="docutils literal notranslate"><span class="pre">test_post_update_analysis_returns_200_when_not_busy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_buttons.test_post_update_analysis_returns_409_and_skips_update_when_busy"><code class="docutils literal notranslate"><span class="pre">test_post_update_analysis_returns_409_and_skips_update_when_busy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_clean.test_clean_data_parses_rows_and_details"><code class="docutils literal notranslate"><span class="pre">test_clean_data_parses_rows_and_details()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_clean.test_clean_data_returns_empty_list_when_no_rows"><code class="docutils literal notranslate"><span class="pre">test_clean_data_returns_empty_list_when_no_rows()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_db_insert.app"><code class="docutils literal notranslate"><span class="pre">app()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_db_insert.client"><code class="docutils literal notranslate"><span class="pre">client()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_db_insert.test_pull_data_inserts_new_rows_with_required_fields"><code class="docutils literal notranslate"><span class="pre">test_pull_data_inserts_new_rows_with_required_fields()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_db_insert.test_pull_data_is_idempotent_for_duplicate_rows_by_url"><code class="docutils literal notranslate"><span class="pre">test_pull_data_is_idempotent_for_duplicate_rows_by_url()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_db_insert.test_simple_query_returns_dict_with_expected_schema_keys"><code class="docutils literal notranslate"><span class="pre">test_simple_query_returns_dict_with_expected_schema_keys()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_flask_page.app"><code class="docutils literal notranslate"><span class="pre">app()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_flask_page.client"><code class="docutils literal notranslate"><span class="pre">client()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_flask_page.test_app_is_flask_instance_and_testable"><code class="docutils literal notranslate"><span class="pre">test_app_is_flask_instance_and_testable()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_flask_page.test_app_routes_are_created"><code class="docutils literal notranslate"><span class="pre">test_app_routes_are_created()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_flask_page.test_get_analysis_returns_200"><code class="docutils literal notranslate"><span class="pre">test_get_analysis_returns_200()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_flask_page.test_get_analysis_contains_page_buttons"><code class="docutils literal notranslate"><span class="pre">test_get_analysis_contains_page_buttons()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_flask_page.test_get_analysis_contains_page_content"><code class="docutils literal notranslate"><span class="pre">test_get_analysis_contains_page_content()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_integration_end_to_end.app"><code class="docutils literal notranslate"><span class="pre">app()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_integration_end_to_end.client"><code class="docutils literal notranslate"><span class="pre">client()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_integration_end_to_end.test_end_to_end_pull_update_render_flow"><code class="docutils literal notranslate"><span class="pre">test_end_to_end_pull_update_render_flow()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_integration_end_to_end.test_multiple_pull_data_requests_dedupe_by_url"><code class="docutils literal notranslate"><span class="pre">test_multiple_pull_data_requests_dedupe_by_url()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_load_data.test_clean_text_and_parse_number"><code class="docutils literal notranslate"><span class="pre">test_clean_text_and_parse_number()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_load_data.test_load_reads_json_array_and_resets_table"><code class="docutils literal notranslate"><span class="pre">test_load_reads_json_array_and_resets_table()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_load_data.test_load_reads_json_lines_and_skips_blank_lines"><code class="docutils literal notranslate"><span class="pre">test_load_reads_json_lines_and_skips_blank_lines()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_load_data.test_load_handles_empty_file"><code class="docutils literal notranslate"><span class="pre">test_load_handles_empty_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_query_data.test_queries_list_contains_expected_items"><code class="docutils literal notranslate"><span class="pre">test_queries_list_contains_expected_items()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_query_data.test_main_executes_queries_and_formats_output"><code class="docutils literal notranslate"><span class="pre">test_main_executes_queries_and_formats_output()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_scrape.test_normalise_url_handles_empty_and_trailing_slash"><code class="docutils literal notranslate"><span class="pre">test_normalise_url_handles_empty_and_trailing_slash()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_scrape.test_get_existing_urls_normalises_and_filters"><code class="docutils literal notranslate"><span class="pre">test_get_existing_urls_normalises_and_filters()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_scrape.test_scrape_data_filters_seen_urls_and_decodes"><code class="docutils literal notranslate"><span class="pre">test_scrape_data_filters_seen_urls_and_decodes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_scrape.test_save_data_writes_json_and_prints"><code class="docutils literal notranslate"><span class="pre">test_save_data_writes_json_and_prints()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test_scrape.test_save_data_handles_empty_rows"><code class="docutils literal notranslate"><span class="pre">test_save_data_handles_empty_rows()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="testing_guide.html">Testing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="publishing.html">Build and Publish Docs (GitHub)</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">module_4 assignment</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="api_reference.html">API Reference</a></li>
+      <li class="breadcrumb-item active">Test Modules</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/api_tests.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-test_analysis_format">
+<span id="test-modules"></span><h1>Test Modules<a class="headerlink" href="#module-test_analysis_format" title="Link to this heading"></a></h1>
+<p>Tests for analysis-page answer label and percentage formatting behavior.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="test_analysis_format.app">
+<span class="sig-prename descclassname"><span class="pre">test_analysis_format.</span></span><span class="sig-name descname"><span class="pre">app</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_analysis_format.html#app"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_analysis_format.app" title="Link to this definition"></a></dt>
+<dd><p>Create a Flask app configured for test execution.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_analysis_format.client">
+<span class="sig-prename descclassname"><span class="pre">test_analysis_format.</span></span><span class="sig-name descname"><span class="pre">client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_analysis_format.html#client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_analysis_format.client" title="Link to this definition"></a></dt>
+<dd><p>Create a test client for HTTP route checks.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_analysis_format.test_all_analysis_items_are_labeled_with_answer_prefix">
+<span class="sig-prename descclassname"><span class="pre">test_analysis_format.</span></span><span class="sig-name descname"><span class="pre">test_all_analysis_items_are_labeled_with_answer_prefix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_analysis_format.html#test_all_analysis_items_are_labeled_with_answer_prefix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_analysis_format.test_all_analysis_items_are_labeled_with_answer_prefix" title="Link to this definition"></a></dt>
+<dd><p>Verify each rendered analysis row starts with the <code class="docutils literal notranslate"><span class="pre">Answer:</span></code> prefix.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_analysis_format.test_rendered_percentages_have_two_decimal_digits">
+<span class="sig-prename descclassname"><span class="pre">test_analysis_format.</span></span><span class="sig-name descname"><span class="pre">test_rendered_percentages_have_two_decimal_digits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_analysis_format.html#test_rendered_percentages_have_two_decimal_digits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_analysis_format.test_rendered_percentages_have_two_decimal_digits" title="Link to this definition"></a></dt>
+<dd><p>Verify rendered percentage metrics include exactly two decimal digits.</p>
+</dd></dl>
+
+<p id="module-test_app">Integration tests for Flask app orchestration and startup behavior.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="test_app.test_pull_data_busy_states">
+<span class="sig-prename descclassname"><span class="pre">test_app.</span></span><span class="sig-name descname"><span class="pre">test_pull_data_busy_states</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_app.html#test_pull_data_busy_states"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_app.test_pull_data_busy_states" title="Link to this definition"></a></dt>
+<dd><p>Validate pull-worker busy detection for none, running, and done states.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_app.test_start_pull_worker_sets_process">
+<span class="sig-prename descclassname"><span class="pre">test_app.</span></span><span class="sig-name descname"><span class="pre">test_start_pull_worker_sets_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_app.html#test_start_pull_worker_sets_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_app.test_start_pull_worker_sets_process" title="Link to this definition"></a></dt>
+<dd><p>Ensure starting the worker stores the launched process handle.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_app.test_run_pull_job_calls_dependencies">
+<span class="sig-prename descclassname"><span class="pre">test_app.</span></span><span class="sig-name descname"><span class="pre">test_run_pull_job_calls_dependencies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_app.html#test_run_pull_job_calls_dependencies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_app.test_run_pull_job_calls_dependencies" title="Link to this definition"></a></dt>
+<dd><p>Ensure pull-job workflow calls scrape, save, and load in sequence.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_app.test_perform_update_analysis_clears_cache">
+<span class="sig-prename descclassname"><span class="pre">test_app.</span></span><span class="sig-name descname"><span class="pre">test_perform_update_analysis_clears_cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_app.html#test_perform_update_analysis_clears_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_app.test_perform_update_analysis_clears_cache" title="Link to this definition"></a></dt>
+<dd><p>Ensure analysis cache reset empties stored results.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_app.test_get_db_connection_uses_database_url">
+<span class="sig-prename descclassname"><span class="pre">test_app.</span></span><span class="sig-name descname"><span class="pre">test_get_db_connection_uses_database_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_app.html#test_get_db_connection_uses_database_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_app.test_get_db_connection_uses_database_url" title="Link to this definition"></a></dt>
+<dd><p>Ensure <code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code> is used when positional connect arg is supported.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_app.test_get_db_connection_uses_database_url_conninfo">
+<span class="sig-prename descclassname"><span class="pre">test_app.</span></span><span class="sig-name descname"><span class="pre">test_get_db_connection_uses_database_url_conninfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_app.html#test_get_db_connection_uses_database_url_conninfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_app.test_get_db_connection_uses_database_url_conninfo" title="Link to this definition"></a></dt>
+<dd><p>Ensure <code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code> is passed as <code class="docutils literal notranslate"><span class="pre">conninfo</span></code> when required.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_app.test_get_db_connection_uses_default">
+<span class="sig-prename descclassname"><span class="pre">test_app.</span></span><span class="sig-name descname"><span class="pre">test_get_db_connection_uses_default</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_app.html#test_get_db_connection_uses_default"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_app.test_get_db_connection_uses_default" title="Link to this definition"></a></dt>
+<dd><p>Ensure default local database settings are used without <code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_app.test_index_uses_cached_results_when_skip_queries">
+<span class="sig-prename descclassname"><span class="pre">test_app.</span></span><span class="sig-name descname"><span class="pre">test_index_uses_cached_results_when_skip_queries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_app.html#test_index_uses_cached_results_when_skip_queries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_app.test_index_uses_cached_results_when_skip_queries" title="Link to this definition"></a></dt>
+<dd><p>Ensure index view returns cached results when query execution is skipped.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_app.test_index_queries_and_formats_results">
+<span class="sig-prename descclassname"><span class="pre">test_app.</span></span><span class="sig-name descname"><span class="pre">test_index_queries_and_formats_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_app.html#test_index_queries_and_formats_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_app.test_index_queries_and_formats_results" title="Link to this definition"></a></dt>
+<dd><p>Ensure index view executes queries and formats row variants correctly.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_app.test_pull_data_route_busy_and_ok">
+<span class="sig-prename descclassname"><span class="pre">test_app.</span></span><span class="sig-name descname"><span class="pre">test_pull_data_route_busy_and_ok</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_app.html#test_pull_data_route_busy_and_ok"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_app.test_pull_data_route_busy_and_ok" title="Link to this definition"></a></dt>
+<dd><p>Ensure pull-data route returns expected statuses for busy and idle states.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_app.test_update_analysis_route_busy_and_ok">
+<span class="sig-prename descclassname"><span class="pre">test_app.</span></span><span class="sig-name descname"><span class="pre">test_update_analysis_route_busy_and_ok</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_app.html#test_update_analysis_route_busy_and_ok"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_app.test_update_analysis_route_busy_and_ok" title="Link to this definition"></a></dt>
+<dd><p>Ensure update-analysis route returns expected statuses for busy and idle states.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_app.test_create_app_registers_routes">
+<span class="sig-prename descclassname"><span class="pre">test_app.</span></span><span class="sig-name descname"><span class="pre">test_create_app_registers_routes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_app.html#test_create_app_registers_routes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_app.test_create_app_registers_routes" title="Link to this definition"></a></dt>
+<dd><p>Ensure app factory registers all required routes.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_app.test_main_run_pull_job_branch">
+<span class="sig-prename descclassname"><span class="pre">test_app.</span></span><span class="sig-name descname"><span class="pre">test_main_run_pull_job_branch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_app.html#test_main_run_pull_job_branch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_app.test_main_run_pull_job_branch" title="Link to this definition"></a></dt>
+<dd><p>Ensure <code class="docutils literal notranslate"><span class="pre">app</span></code> main module executes pull-job branch and exits cleanly.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_app.test_main_default_branch_runs_load_and_server">
+<span class="sig-prename descclassname"><span class="pre">test_app.</span></span><span class="sig-name descname"><span class="pre">test_main_default_branch_runs_load_and_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_app.html#test_main_default_branch_runs_load_and_server"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_app.test_main_default_branch_runs_load_and_server" title="Link to this definition"></a></dt>
+<dd><p>Ensure default main branch loads seed data and starts Flask server.</p>
+</dd></dl>
+
+<p id="module-test_buttons">Route-level tests for analysis page action buttons and busy gating.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="test_buttons.app">
+<span class="sig-prename descclassname"><span class="pre">test_buttons.</span></span><span class="sig-name descname"><span class="pre">app</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_buttons.html#app"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_buttons.app" title="Link to this definition"></a></dt>
+<dd><p>Create a test-configured Flask app with worker state reset.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_buttons.client">
+<span class="sig-prename descclassname"><span class="pre">test_buttons.</span></span><span class="sig-name descname"><span class="pre">client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_buttons.html#client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_buttons.client" title="Link to this definition"></a></dt>
+<dd><p>Create a test client for button endpoint requests.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_buttons.test_post_pull_data_returns_200">
+<span class="sig-prename descclassname"><span class="pre">test_buttons.</span></span><span class="sig-name descname"><span class="pre">test_post_pull_data_returns_200</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_buttons.html#test_post_pull_data_returns_200"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_buttons.test_post_pull_data_returns_200" title="Link to this definition"></a></dt>
+<dd><p>Ensure <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/pull-data</span></code> succeeds when no worker is active.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_buttons.test_post_pull_data_triggers_loader">
+<span class="sig-prename descclassname"><span class="pre">test_buttons.</span></span><span class="sig-name descname"><span class="pre">test_post_pull_data_triggers_loader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_buttons.html#test_post_pull_data_triggers_loader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_buttons.test_post_pull_data_triggers_loader" title="Link to this definition"></a></dt>
+<dd><p>Ensure pull-data flow passes scraped rows through save and load stages.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_buttons.test_post_pull_data_returns_409_when_busy_and_skips_update_when_busy">
+<span class="sig-prename descclassname"><span class="pre">test_buttons.</span></span><span class="sig-name descname"><span class="pre">test_post_pull_data_returns_409_when_busy_and_skips_update_when_busy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_buttons.html#test_post_pull_data_returns_409_when_busy_and_skips_update_when_busy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_buttons.test_post_pull_data_returns_409_when_busy_and_skips_update_when_busy" title="Link to this definition"></a></dt>
+<dd><p>Ensure <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/pull-data</span></code> returns 409 and does not launch when busy.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_buttons.test_post_update_analysis_returns_200_when_not_busy">
+<span class="sig-prename descclassname"><span class="pre">test_buttons.</span></span><span class="sig-name descname"><span class="pre">test_post_update_analysis_returns_200_when_not_busy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_buttons.html#test_post_update_analysis_returns_200_when_not_busy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_buttons.test_post_update_analysis_returns_200_when_not_busy" title="Link to this definition"></a></dt>
+<dd><p>Ensure <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/update-analysis</span></code> succeeds when not busy.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_buttons.test_post_update_analysis_returns_409_and_skips_update_when_busy">
+<span class="sig-prename descclassname"><span class="pre">test_buttons.</span></span><span class="sig-name descname"><span class="pre">test_post_update_analysis_returns_409_and_skips_update_when_busy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_buttons.html#test_post_update_analysis_returns_409_and_skips_update_when_busy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_buttons.test_post_update_analysis_returns_409_and_skips_update_when_busy" title="Link to this definition"></a></dt>
+<dd><p>Ensure <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/update-analysis</span></code> returns 409 and skips cache update when busy.</p>
+</dd></dl>
+
+<p id="module-test_clean">Integration tests for HTML cleaning and field extraction logic.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="test_clean.test_clean_data_parses_rows_and_details">
+<span class="sig-prename descclassname"><span class="pre">test_clean.</span></span><span class="sig-name descname"><span class="pre">test_clean_data_parses_rows_and_details</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_clean.html#test_clean_data_parses_rows_and_details"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_clean.test_clean_data_parses_rows_and_details" title="Link to this definition"></a></dt>
+<dd><p>Ensure row parsing captures overview fields and detail-row enrichments.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_clean.test_clean_data_returns_empty_list_when_no_rows">
+<span class="sig-prename descclassname"><span class="pre">test_clean.</span></span><span class="sig-name descname"><span class="pre">test_clean_data_returns_empty_list_when_no_rows</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_clean.html#test_clean_data_returns_empty_list_when_no_rows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_clean.test_clean_data_returns_empty_list_when_no_rows" title="Link to this definition"></a></dt>
+<dd><p>Ensure no table rows produces an empty record list.</p>
+</dd></dl>
+
+<p id="module-test_db_insert">Database-flow tests for pull-data insertion and deduplication semantics.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="test_db_insert.app">
+<span class="sig-prename descclassname"><span class="pre">test_db_insert.</span></span><span class="sig-name descname"><span class="pre">app</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_db_insert.html#app"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_db_insert.app" title="Link to this definition"></a></dt>
+<dd><p>Create a test Flask app with pull-worker state reset.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_db_insert.client">
+<span class="sig-prename descclassname"><span class="pre">test_db_insert.</span></span><span class="sig-name descname"><span class="pre">client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_db_insert.html#client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_db_insert.client" title="Link to this definition"></a></dt>
+<dd><p>Create a test client for database-flow endpoint testing.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_db_insert.test_pull_data_inserts_new_rows_with_required_fields">
+<span class="sig-prename descclassname"><span class="pre">test_db_insert.</span></span><span class="sig-name descname"><span class="pre">test_pull_data_inserts_new_rows_with_required_fields</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_db_insert.html#test_pull_data_inserts_new_rows_with_required_fields"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_db_insert.test_pull_data_inserts_new_rows_with_required_fields" title="Link to this definition"></a></dt>
+<dd><p>Ensure pull-data inserts rows with required non-empty schema fields.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_db_insert.test_pull_data_is_idempotent_for_duplicate_rows_by_url">
+<span class="sig-prename descclassname"><span class="pre">test_db_insert.</span></span><span class="sig-name descname"><span class="pre">test_pull_data_is_idempotent_for_duplicate_rows_by_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_db_insert.html#test_pull_data_is_idempotent_for_duplicate_rows_by_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_db_insert.test_pull_data_is_idempotent_for_duplicate_rows_by_url" title="Link to this definition"></a></dt>
+<dd><p>Ensure repeated pull-data calls do not insert duplicate URLs.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_db_insert.test_simple_query_returns_dict_with_expected_schema_keys">
+<span class="sig-prename descclassname"><span class="pre">test_db_insert.</span></span><span class="sig-name descname"><span class="pre">test_simple_query_returns_dict_with_expected_schema_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_db_insert.html#test_simple_query_returns_dict_with_expected_schema_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_db_insert.test_simple_query_returns_dict_with_expected_schema_keys" title="Link to this definition"></a></dt>
+<dd><p>Ensure a fetched row dictionary contains the expected schema key set.</p>
+</dd></dl>
+
+<p id="module-test_flask_page">Web-layer tests for Flask app routing and analysis page rendering.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="test_flask_page.app">
+<span class="sig-prename descclassname"><span class="pre">test_flask_page.</span></span><span class="sig-name descname"><span class="pre">app</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_flask_page.html#app"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_flask_page.app" title="Link to this definition"></a></dt>
+<dd><p>Create a Flask app configured for page-level web tests.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_flask_page.client">
+<span class="sig-prename descclassname"><span class="pre">test_flask_page.</span></span><span class="sig-name descname"><span class="pre">client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_flask_page.html#client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_flask_page.client" title="Link to this definition"></a></dt>
+<dd><p>Create a test client for HTTP requests to page routes.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_flask_page.test_app_is_flask_instance_and_testable">
+<span class="sig-prename descclassname"><span class="pre">test_flask_page.</span></span><span class="sig-name descname"><span class="pre">test_app_is_flask_instance_and_testable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_flask_page.html#test_app_is_flask_instance_and_testable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_flask_page.test_app_is_flask_instance_and_testable" title="Link to this definition"></a></dt>
+<dd><p>Ensure app factory returns a Flask instance in testing mode.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_flask_page.test_app_routes_are_created">
+<span class="sig-prename descclassname"><span class="pre">test_flask_page.</span></span><span class="sig-name descname"><span class="pre">test_app_routes_are_created</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_flask_page.html#test_app_routes_are_created"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_flask_page.test_app_routes_are_created" title="Link to this definition"></a></dt>
+<dd><p>Ensure expected routes exist with correct HTTP methods.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_flask_page.test_get_analysis_returns_200">
+<span class="sig-prename descclassname"><span class="pre">test_flask_page.</span></span><span class="sig-name descname"><span class="pre">test_get_analysis_returns_200</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_flask_page.html#test_get_analysis_returns_200"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_flask_page.test_get_analysis_returns_200" title="Link to this definition"></a></dt>
+<dd><p>Ensure <code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/analysis</span></code> responds with HTTP 200.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_flask_page.test_get_analysis_contains_page_buttons">
+<span class="sig-prename descclassname"><span class="pre">test_flask_page.</span></span><span class="sig-name descname"><span class="pre">test_get_analysis_contains_page_buttons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_flask_page.html#test_get_analysis_contains_page_buttons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_flask_page.test_get_analysis_contains_page_buttons" title="Link to this definition"></a></dt>
+<dd><p>Ensure analysis page renders pull/update action button elements.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_flask_page.test_get_analysis_contains_page_content">
+<span class="sig-prename descclassname"><span class="pre">test_flask_page.</span></span><span class="sig-name descname"><span class="pre">test_get_analysis_contains_page_content</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_flask_page.html#test_get_analysis_contains_page_content"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_flask_page.test_get_analysis_contains_page_content" title="Link to this definition"></a></dt>
+<dd><p>Ensure analysis page includes core heading and answer text markers.</p>
+</dd></dl>
+
+<p id="module-test_integration_end_to_end">End-to-end integration tests spanning pull, update, and analysis render flow.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="test_integration_end_to_end.app">
+<span class="sig-prename descclassname"><span class="pre">test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">app</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_integration_end_to_end.html#app"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_integration_end_to_end.app" title="Link to this definition"></a></dt>
+<dd><p>Create an app instance with reset globals for integration scenarios.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_integration_end_to_end.client">
+<span class="sig-prename descclassname"><span class="pre">test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_integration_end_to_end.html#client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_integration_end_to_end.client" title="Link to this definition"></a></dt>
+<dd><p>Create a test client for end-to-end request sequences.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_integration_end_to_end.test_end_to_end_pull_update_render_flow">
+<span class="sig-prename descclassname"><span class="pre">test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">test_end_to_end_pull_update_render_flow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_integration_end_to_end.html#test_end_to_end_pull_update_render_flow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_integration_end_to_end.test_end_to_end_pull_update_render_flow" title="Link to this definition"></a></dt>
+<dd><p>Ensure pull, update, and analysis render produce expected formatted output.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_integration_end_to_end.test_multiple_pull_data_requests_dedupe_by_url">
+<span class="sig-prename descclassname"><span class="pre">test_integration_end_to_end.</span></span><span class="sig-name descname"><span class="pre">test_multiple_pull_data_requests_dedupe_by_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_integration_end_to_end.html#test_multiple_pull_data_requests_dedupe_by_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_integration_end_to_end.test_multiple_pull_data_requests_dedupe_by_url" title="Link to this definition"></a></dt>
+<dd><p>Ensure repeated pulls enforce URL-based deduplication across batches.</p>
+</dd></dl>
+
+<p id="module-test_load_data">Integration tests for JSON loading and value normalization helpers.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="test_load_data.test_clean_text_and_parse_number">
+<span class="sig-prename descclassname"><span class="pre">test_load_data.</span></span><span class="sig-name descname"><span class="pre">test_clean_text_and_parse_number</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_load_data.html#test_clean_text_and_parse_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_load_data.test_clean_text_and_parse_number" title="Link to this definition"></a></dt>
+<dd><p>Ensure helper normalizers clean null bytes and parse numeric tokens.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_load_data.test_load_reads_json_array_and_resets_table">
+<span class="sig-prename descclassname"><span class="pre">test_load_data.</span></span><span class="sig-name descname"><span class="pre">test_load_reads_json_array_and_resets_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capsys</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_load_data.html#test_load_reads_json_array_and_resets_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_load_data.test_load_reads_json_array_and_resets_table" title="Link to this definition"></a></dt>
+<dd><p>Ensure array JSON input loads rows and reset mode recreates state.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_load_data.test_load_reads_json_lines_and_skips_blank_lines">
+<span class="sig-prename descclassname"><span class="pre">test_load_data.</span></span><span class="sig-name descname"><span class="pre">test_load_reads_json_lines_and_skips_blank_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_load_data.html#test_load_reads_json_lines_and_skips_blank_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_load_data.test_load_reads_json_lines_and_skips_blank_lines" title="Link to this definition"></a></dt>
+<dd><p>Ensure line-delimited JSON input is parsed and blank lines are ignored.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_load_data.test_load_handles_empty_file">
+<span class="sig-prename descclassname"><span class="pre">test_load_data.</span></span><span class="sig-name descname"><span class="pre">test_load_handles_empty_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_load_data.html#test_load_handles_empty_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_load_data.test_load_handles_empty_file" title="Link to this definition"></a></dt>
+<dd><p>Ensure empty input files result in zero inserted rows.</p>
+</dd></dl>
+
+<p id="module-test_query_data">Integration tests for query definition structure and CLI output formatting.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="test_query_data.test_queries_list_contains_expected_items">
+<span class="sig-prename descclassname"><span class="pre">test_query_data.</span></span><span class="sig-name descname"><span class="pre">test_queries_list_contains_expected_items</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_query_data.html#test_queries_list_contains_expected_items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_query_data.test_queries_list_contains_expected_items" title="Link to this definition"></a></dt>
+<dd><p>Ensure the <code class="docutils literal notranslate"><span class="pre">QUERIES</span></code> container exposes valid label/prefix/SQL tuples.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_query_data.test_main_executes_queries_and_formats_output">
+<span class="sig-prename descclassname"><span class="pre">test_query_data.</span></span><span class="sig-name descname"><span class="pre">test_main_executes_queries_and_formats_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capsys</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_query_data.html#test_main_executes_queries_and_formats_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_query_data.test_main_executes_queries_and_formats_output" title="Link to this definition"></a></dt>
+<dd><p>Ensure standalone query runner prints expected formatted output values.</p>
+</dd></dl>
+
+<p id="module-test_scrape">Integration tests for scraping URL normalization, filtering, and persistence.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="test_scrape.test_normalise_url_handles_empty_and_trailing_slash">
+<span class="sig-prename descclassname"><span class="pre">test_scrape.</span></span><span class="sig-name descname"><span class="pre">test_normalise_url_handles_empty_and_trailing_slash</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_scrape.html#test_normalise_url_handles_empty_and_trailing_slash"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_scrape.test_normalise_url_handles_empty_and_trailing_slash" title="Link to this definition"></a></dt>
+<dd><p>Ensure URL normalization handles empty input and strips trailing slashes.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_scrape.test_get_existing_urls_normalises_and_filters">
+<span class="sig-prename descclassname"><span class="pre">test_scrape.</span></span><span class="sig-name descname"><span class="pre">test_get_existing_urls_normalises_and_filters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_scrape.html#test_get_existing_urls_normalises_and_filters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_scrape.test_get_existing_urls_normalises_and_filters" title="Link to this definition"></a></dt>
+<dd><p>Ensure existing URL retrieval filters null/empty values and normalizes output.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_scrape.test_scrape_data_filters_seen_urls_and_decodes">
+<span class="sig-prename descclassname"><span class="pre">test_scrape.</span></span><span class="sig-name descname"><span class="pre">test_scrape_data_filters_seen_urls_and_decodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_scrape.html#test_scrape_data_filters_seen_urls_and_decodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_scrape.test_scrape_data_filters_seen_urls_and_decodes" title="Link to this definition"></a></dt>
+<dd><p>Ensure scraping skips seen URLs and handles decode fallback behavior.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_scrape.test_save_data_writes_json_and_prints">
+<span class="sig-prename descclassname"><span class="pre">test_scrape.</span></span><span class="sig-name descname"><span class="pre">test_save_data_writes_json_and_prints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capsys</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_scrape.html#test_save_data_writes_json_and_prints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_scrape.test_save_data_writes_json_and_prints" title="Link to this definition"></a></dt>
+<dd><p>Ensure saving rows writes JSON and reports saved row count.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="test_scrape.test_save_data_handles_empty_rows">
+<span class="sig-prename descclassname"><span class="pre">test_scrape.</span></span><span class="sig-name descname"><span class="pre">test_save_data_handles_empty_rows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monkeypatch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capsys</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/test_scrape.html#test_save_data_handles_empty_rows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#test_scrape.test_save_data_handles_empty_rows" title="Link to this definition"></a></dt>
+<dd><p>Ensure saving empty rows reports zero saved records.</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="api_flask_routes.html" class="btn btn-neutral float-left" title="Flask App Routes (app.py)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="testing_guide.html" class="btn btn-neutral float-right" title="Testing Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Neil Fernandez.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

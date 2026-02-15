@@ -11,4 +11,4 @@ The following pages are generated with Sphinx autodoc from ``module_4/src``.
    api_load_data
    api_query_data
    api_flask_routes
-
+   api_tests

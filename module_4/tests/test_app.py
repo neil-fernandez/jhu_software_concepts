@@ -1,3 +1,5 @@
+"""Integration tests for Flask app orchestration and startup behavior."""
+
 import os
 import runpy
 import sys
@@ -11,6 +13,7 @@ import app as flask_app_module
 
 @pytest.mark.integration
 def test_pull_data_busy_states():
+    """Validate pull-worker busy detection for none, running, and done states."""
     # test pull_data_busy returns expected status for None, running, done
     # when no process exists
     flask_app_module.PULL_DATA_PROCESS = None
@@ -38,6 +41,7 @@ def test_pull_data_busy_states():
 
 @pytest.mark.integration
 def test_start_pull_worker_sets_process(monkeypatch):
+    """Ensure starting the worker stores the launched process handle."""
     # test start_pull_worker launches subprocess and stores handle
     captured = {}
 
@@ -56,6 +60,7 @@ def test_start_pull_worker_sets_process(monkeypatch):
 
 @pytest.mark.integration
 def test_run_pull_job_calls_dependencies(monkeypatch):
+    """Ensure pull-job workflow calls scrape, save, and load in sequence."""
     # test run_pull_job calls scrape, save, and load with expected inputs
     captured = {"saved": None, "loaded": None}
     rows = [{"row": 1}]
@@ -83,6 +88,7 @@ def test_run_pull_job_calls_dependencies(monkeypatch):
 
 @pytest.mark.integration
 def test_perform_update_analysis_clears_cache():
+    """Ensure analysis cache reset empties stored results."""
     # test perform_update_analysis clears cached query results
     flask_app_module.LAST_RESULTS = [("cached", "Answer: ", "value")]
     flask_app_module.perform_update_analysis()
@@ -91,6 +97,7 @@ def test_perform_update_analysis_clears_cache():
 
 @pytest.mark.integration
 def test_get_db_connection_uses_database_url(monkeypatch):
+    """Ensure ``DATABASE_URL`` is used when positional connect arg is supported."""
     # test get_db_connection prefers DATABASE_URL when set
     captured = {}
 
@@ -111,6 +118,7 @@ def test_get_db_connection_uses_database_url(monkeypatch):
 
 @pytest.mark.integration
 def test_get_db_connection_uses_database_url_conninfo(monkeypatch):
+    """Ensure ``DATABASE_URL`` is passed as ``conninfo`` when required."""
     # test get_db_connection uses conninfo path when connect has no positional value arg
     captured = {}
 
@@ -129,6 +137,7 @@ def test_get_db_connection_uses_database_url_conninfo(monkeypatch):
 
 @pytest.mark.integration
 def test_get_db_connection_uses_default(monkeypatch):
+    """Ensure default local database settings are used without ``DATABASE_URL``."""
     # test get_db_connection falls back to default connection settings
     captured = {}
 
@@ -149,6 +158,7 @@ def test_get_db_connection_uses_default(monkeypatch):
 
 @pytest.mark.integration
 def test_index_uses_cached_results_when_skip_queries(monkeypatch):
+    """Ensure index view returns cached results when query execution is skipped."""
     # test index returns cached results when skip_queries=1
     flask_app_module.LAST_RESULTS = [("cached", "Answer: ", "value")]
 
@@ -170,6 +180,7 @@ def test_index_uses_cached_results_when_skip_queries(monkeypatch):
 
 @pytest.mark.integration
 def test_index_queries_and_formats_results(monkeypatch):
+    """Ensure index view executes queries and formats row variants correctly."""
     # test index executes queries and formats results for multi, single, and None rows
     flask_app_module.LAST_RESULTS = []
 
@@ -229,6 +240,7 @@ def test_index_queries_and_formats_results(monkeypatch):
 
 @pytest.mark.integration
 def test_pull_data_route_busy_and_ok(monkeypatch):
+    """Ensure pull-data route returns expected statuses for busy and idle states."""
     # test pull_data returns 409 when busy and 200 when not busy
     app = flask_app_module.create_app()
     client = app.test_client()
@@ -253,6 +265,7 @@ def test_pull_data_route_busy_and_ok(monkeypatch):
 
 @pytest.mark.integration
 def test_update_analysis_route_busy_and_ok(monkeypatch):
+    """Ensure update-analysis route returns expected statuses for busy and idle states."""
     # test update_analysis returns 409 when busy and 200 when not busy
     app = flask_app_module.create_app()
     client = app.test_client()
@@ -277,6 +290,7 @@ def test_update_analysis_route_busy_and_ok(monkeypatch):
 
 @pytest.mark.integration
 def test_create_app_registers_routes():
+    """Ensure app factory registers all required routes."""
     # test create_app registers expected routes
     app = flask_app_module.create_app()
     routes = {rule.rule: rule.methods for rule in app.url_map.iter_rules()}
@@ -288,6 +302,7 @@ def test_create_app_registers_routes():
 
 @pytest.mark.integration
 def test_main_run_pull_job_branch(monkeypatch):
+    """Ensure ``app`` main module executes pull-job branch and exits cleanly."""
     # test __main__ run-pull-job branch executes and exits
     fake_load_data = types.ModuleType("load_data")
     fake_scrape = types.ModuleType("scrape")
@@ -324,6 +339,7 @@ def test_main_run_pull_job_branch(monkeypatch):
 
 @pytest.mark.integration
 def test_main_default_branch_runs_load_and_server(monkeypatch):
+    """Ensure default main branch loads seed data and starts Flask server."""
     # test __main__ default branch loads data and starts server
     fake_load_data = types.ModuleType("load_data")
     fake_query_data = types.ModuleType("query_data")

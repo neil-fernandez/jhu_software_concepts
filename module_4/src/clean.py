@@ -1,13 +1,23 @@
-"""
-This module contains functions clean_data which is used to
-clean scraped data using regex, beautifulsoup and string
-expressions.
+"""Data cleaning utilities for scraped applicant survey HTML.
+
+This module parses GradCafe table markup and extracts normalized fields used
+by downstream loading and analysis steps.
 """
 
 import re
 from bs4 import BeautifulSoup
 
 def clean_data(html):
+    """Parse raw survey HTML and return normalized applicant records.
+
+    The parser extracts core row values and enriches each record with optional
+    attributes discovered in follow-up detail rows.
+
+    :param html: Raw HTML content containing survey table rows.
+    :type html: str
+    :return: List of normalized applicant dictionaries.
+    :rtype: list[dict]
+    """
     results = []
     soup = BeautifulSoup(html, "html.parser")
     last_row = None

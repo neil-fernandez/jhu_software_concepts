@@ -1,3 +1,5 @@
+"""Web-layer tests for Flask app routing and analysis page rendering."""
+
 import pytest
 from flask import Flask
 from bs4 import BeautifulSoup
@@ -7,6 +9,7 @@ import app as flask_app_module  # load app for testing Flask app object
 
 @pytest.fixture()
 def app():
+    """Create a Flask app configured for page-level web tests."""
     flask_app = flask_app_module.create_app()  # get the Flask app instance
     flask_app.config["TESTING"] = True  # enable test mode
     flask_app.config["LIVESERVER_PORT"] = 8080
@@ -18,12 +21,14 @@ def app():
 # provide test client that simulates HTTP requests to app without a live server
 @pytest.fixture()
 def client(app):
+    """Create a test client for HTTP requests to page routes."""
     return app.test_client()
 
 
 # test that app is valid Flask app created in test mode (i.e. testable)
 @pytest.mark.web
 def test_app_is_flask_instance_and_testable(app):
+    """Ensure app factory returns a Flask instance in testing mode."""
     assert isinstance(app, Flask)
     assert app.config["TESTING"] is True
 
@@ -31,6 +36,7 @@ def test_app_is_flask_instance_and_testable(app):
 # test that all routes have been created and each route allows the correct HTTP request type
 @pytest.mark.web
 def test_app_routes_are_created(app):
+    """Ensure expected routes exist with correct HTTP methods."""
     routes = {rule.rule: rule.methods for rule in app.url_map.iter_rules()}
 
     assert "/" in routes
@@ -46,6 +52,7 @@ def test_app_routes_are_created(app):
 # test GET /analysis page load returns Status 200
 @pytest.mark.web
 def test_get_analysis_returns_200(client):
+    """Ensure ``GET /analysis`` responds with HTTP 200."""
     response = client.get("/analysis", query_string={"skip_queries": "1"})
     assert response.status_code == 200
 
@@ -53,6 +60,7 @@ def test_get_analysis_returns_200(client):
 # test GET "/analysis" page contains both "Pull Data" and "Update Analysis" button elements and labels
 @pytest.mark.web
 def test_get_analysis_contains_page_buttons(client):
+    """Ensure analysis page renders pull/update action button elements."""
     response = client.get("/analysis", query_string={"skip_queries": "1"})
     soup = BeautifulSoup(response.get_data(as_text=True), "html.parser")
 
@@ -71,6 +79,7 @@ def test_get_analysis_contains_page_buttons(client):
 # test GET "/analysis" page text includes "Analysis" and at least one "Answer" label
 @pytest.mark.web
 def test_get_analysis_contains_page_content(client):
+    """Ensure analysis page includes core heading and answer text markers."""
     response = client.get("/analysis", query_string={"skip_queries": "1"})
 
     page = response.get_data(as_text=True)  # get text from HTML bytes

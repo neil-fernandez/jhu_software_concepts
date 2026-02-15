@@ -1,0 +1,499 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>test_db_insert &mdash; module_4 assignment 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            module_4 assignment
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview_setup.html">Overview and Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../operational_notes.html">Operational Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testing_guide.html">Testing Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../publishing.html">Build and Publish Docs (GitHub)</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">module_4 assignment</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">test_db_insert</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for test_db_insert</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Database-flow tests for pull-data insertion and deduplication semantics.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">app</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">flask_app_module</span>
+
+
+<div class="viewcode-block" id="app">
+<a class="viewcode-back" href="../api_tests.html#test_db_insert.app">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">app</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a test Flask app with pull-worker state reset.&quot;&quot;&quot;</span>
+    <span class="n">flask_app</span> <span class="o">=</span> <span class="n">flask_app_module</span><span class="o">.</span><span class="n">create_app</span><span class="p">()</span>
+    <span class="n">flask_app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;TESTING&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">flask_app_module</span><span class="o">.</span><span class="n">PULL_DATA_PROCESS</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">yield</span> <span class="n">flask_app</span></div>
+
+
+
+<div class="viewcode-block" id="client">
+<a class="viewcode-back" href="../api_tests.html#test_db_insert.client">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">client</span><span class="p">(</span><span class="n">app</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a test client for database-flow endpoint testing.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="test_pull_data_inserts_new_rows_with_required_fields">
+<a class="viewcode-back" href="../api_tests.html#test_db_insert.test_pull_data_inserts_new_rows_with_required_fields">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">db</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_pull_data_inserts_new_rows_with_required_fields</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure pull-data inserts rows with required non-empty schema fields.&quot;&quot;&quot;</span>
+    <span class="c1"># create a fake scraped input row</span>
+    <span class="n">fake_rows</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;program&quot;</span><span class="p">:</span> <span class="s2">&quot;Computer Science, Example University&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;masters_or_phd&quot;</span><span class="p">:</span> <span class="s2">&quot;PhD&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;comments&quot;</span><span class="p">:</span> <span class="s2">&quot;Row 1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;date_added&quot;</span><span class="p">:</span> <span class="s2">&quot;January 10, 2025&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://www.thegradcafe.com/result/1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;applicant_status&quot;</span><span class="p">:</span> <span class="s2">&quot;Accepted&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;status_date&quot;</span><span class="p">:</span> <span class="s2">&quot;10 Jan 2025&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;semester_year_start&quot;</span><span class="p">:</span> <span class="s2">&quot;Fall 2025&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;citizenship&quot;</span><span class="p">:</span> <span class="s2">&quot;International&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gpa&quot;</span><span class="p">:</span> <span class="s2">&quot;3.8&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gre&quot;</span><span class="p">:</span> <span class="s2">&quot;330&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gre_v&quot;</span><span class="p">:</span> <span class="s2">&quot;165&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gre_aw&quot;</span><span class="p">:</span> <span class="s2">&quot;4.5&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;llm-generated-program&quot;</span><span class="p">:</span> <span class="s2">&quot;Computer Science&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;llm-generated-university&quot;</span><span class="p">:</span> <span class="s2">&quot;Example University&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;program&quot;</span><span class="p">:</span> <span class="s2">&quot;Data Science, Another University&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;masters_or_phd&quot;</span><span class="p">:</span> <span class="s2">&quot;Masters&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;comments&quot;</span><span class="p">:</span> <span class="s2">&quot;Row 2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;date_added&quot;</span><span class="p">:</span> <span class="s2">&quot;February 2, 2025&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://www.thegradcafe.com/result/2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;applicant_status&quot;</span><span class="p">:</span> <span class="s2">&quot;Interview&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;status_date&quot;</span><span class="p">:</span> <span class="s2">&quot;2 Feb 2025&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;semester_year_start&quot;</span><span class="p">:</span> <span class="s2">&quot;Spring 2026&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;citizenship&quot;</span><span class="p">:</span> <span class="s2">&quot;American&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gpa&quot;</span><span class="p">:</span> <span class="s2">&quot;3.6&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gre&quot;</span><span class="p">:</span> <span class="s2">&quot;325&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gre_v&quot;</span><span class="p">:</span> <span class="s2">&quot;162&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gre_aw&quot;</span><span class="p">:</span> <span class="s2">&quot;4.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;llm-generated-program&quot;</span><span class="p">:</span> <span class="s2">&quot;Data Science&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;llm-generated-university&quot;</span><span class="p">:</span> <span class="s2">&quot;Another University&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">]</span>
+
+    <span class="n">fake_storage</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">fake_table</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># mock scraper to return fake rows</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_scrape_data</span><span class="p">(</span><span class="o">*</span><span class="n">_args</span><span class="p">,</span> <span class="o">**</span><span class="n">_kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">fake_rows</span>
+
+    <span class="c1"># mock save by storing fake rows in fake storage</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_save_data</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">outputfile</span><span class="p">):</span>
+        <span class="n">fake_storage</span><span class="p">[</span><span class="n">outputfile</span><span class="p">]</span> <span class="o">=</span> <span class="n">rows</span>
+
+    <span class="c1"># mock database load with a simplified record to fake table</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_load</span><span class="p">(</span><span class="n">sourcefile</span><span class="p">):</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">fake_storage</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sourcefile</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+            <span class="n">fake_table</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;program&quot;</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;program&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;date_added&quot;</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;date_added&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;url&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;applicant_status&quot;</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;applicant_status&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;masters_or_phd&quot;</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;masters_or_phd&quot;</span><span class="p">),</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+
+    <span class="c1"># mock a finished subprocess</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">FakeDoneProcess</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">poll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="c1"># return fake done process</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_popen</span><span class="p">(</span><span class="n">_cmd</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">flask_app_module</span><span class="o">.</span><span class="n">run_pull_job</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">FakeDoneProcess</span><span class="p">()</span>
+
+    <span class="c1"># swap real scaper, save, load, subprocess with mock-ups</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="o">.</span><span class="n">sd</span><span class="p">,</span> <span class="s2">&quot;scrape_data&quot;</span><span class="p">,</span> <span class="n">fake_scrape_data</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="o">.</span><span class="n">sd</span><span class="p">,</span> <span class="s2">&quot;save_data&quot;</span><span class="p">,</span> <span class="n">fake_save_data</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="o">.</span><span class="n">ld</span><span class="p">,</span> <span class="s2">&quot;load&quot;</span><span class="p">,</span> <span class="n">fake_load</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="o">.</span><span class="n">subprocess</span><span class="p">,</span> <span class="s2">&quot;Popen&quot;</span><span class="p">,</span> <span class="n">fake_popen</span><span class="p">)</span>
+
+    <span class="c1"># test Before POST: fake target table is empty</span>
+    <span class="k">assert</span> <span class="n">fake_table</span> <span class="o">==</span> <span class="p">[]</span>
+
+    <span class="c1"># test POST to endpoint to ensure success</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/pull-data&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">get_json</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;ok&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span>
+
+    <span class="c1"># test After POST: new rows exist in fake table (simulated DB write) with required non-null fields</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">fake_table</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">fake_rows</span><span class="p">)</span>
+    <span class="n">required_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;program&quot;</span><span class="p">,</span> <span class="s2">&quot;date_added&quot;</span><span class="p">,</span> <span class="s2">&quot;url&quot;</span><span class="p">,</span> <span class="s2">&quot;applicant_status&quot;</span><span class="p">,</span> <span class="s2">&quot;masters_or_phd&quot;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">inserted</span> <span class="ow">in</span> <span class="n">fake_table</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">required_fields</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">inserted</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="n">inserted</span><span class="p">[</span><span class="n">field</span><span class="p">])</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="test_pull_data_is_idempotent_for_duplicate_rows_by_url">
+<a class="viewcode-back" href="../api_tests.html#test_db_insert.test_pull_data_is_idempotent_for_duplicate_rows_by_url">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">db</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_pull_data_is_idempotent_for_duplicate_rows_by_url</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure repeated pull-data calls do not insert duplicate URLs.&quot;&quot;&quot;</span>
+    <span class="c1"># create a fake scraped input row</span>
+    <span class="n">fake_rows</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;program&quot;</span><span class="p">:</span> <span class="s2">&quot;Computer Science, Example University&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;masters_or_phd&quot;</span><span class="p">:</span> <span class="s2">&quot;PhD&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;comments&quot;</span><span class="p">:</span> <span class="s2">&quot;Row 1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;date_added&quot;</span><span class="p">:</span> <span class="s2">&quot;January 10, 2025&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://www.thegradcafe.com/result/dup-1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;applicant_status&quot;</span><span class="p">:</span> <span class="s2">&quot;Accepted&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;status_date&quot;</span><span class="p">:</span> <span class="s2">&quot;10 Jan 2025&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;semester_year_start&quot;</span><span class="p">:</span> <span class="s2">&quot;Fall 2025&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;citizenship&quot;</span><span class="p">:</span> <span class="s2">&quot;International&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gpa&quot;</span><span class="p">:</span> <span class="s2">&quot;3.8&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gre&quot;</span><span class="p">:</span> <span class="s2">&quot;330&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gre_v&quot;</span><span class="p">:</span> <span class="s2">&quot;165&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gre_aw&quot;</span><span class="p">:</span> <span class="s2">&quot;4.5&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;llm-generated-program&quot;</span><span class="p">:</span> <span class="s2">&quot;Computer Science&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;llm-generated-university&quot;</span><span class="p">:</span> <span class="s2">&quot;Example University&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;program&quot;</span><span class="p">:</span> <span class="s2">&quot;Data Science, Another University&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;masters_or_phd&quot;</span><span class="p">:</span> <span class="s2">&quot;Masters&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;comments&quot;</span><span class="p">:</span> <span class="s2">&quot;Row 2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;date_added&quot;</span><span class="p">:</span> <span class="s2">&quot;February 2, 2025&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://www.thegradcafe.com/result/dup-2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;applicant_status&quot;</span><span class="p">:</span> <span class="s2">&quot;Interview&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;status_date&quot;</span><span class="p">:</span> <span class="s2">&quot;2 Feb 2025&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;semester_year_start&quot;</span><span class="p">:</span> <span class="s2">&quot;Spring 2026&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;citizenship&quot;</span><span class="p">:</span> <span class="s2">&quot;American&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gpa&quot;</span><span class="p">:</span> <span class="s2">&quot;3.6&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gre&quot;</span><span class="p">:</span> <span class="s2">&quot;325&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gre_v&quot;</span><span class="p">:</span> <span class="s2">&quot;162&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gre_aw&quot;</span><span class="p">:</span> <span class="s2">&quot;4.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;llm-generated-program&quot;</span><span class="p">:</span> <span class="s2">&quot;Data Science&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;llm-generated-university&quot;</span><span class="p">:</span> <span class="s2">&quot;Another University&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">]</span>
+
+    <span class="n">fake_storage</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">fake_table</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">seen_urls</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="c1"># mock scraper to return fake rows</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_scrape_data</span><span class="p">(</span><span class="o">*</span><span class="n">_args</span><span class="p">,</span> <span class="o">**</span><span class="n">_kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">fake_rows</span>
+
+    <span class="c1"># mock save by storing fake rows in fake storage</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_save_data</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">outputfile</span><span class="p">):</span>
+        <span class="n">fake_storage</span><span class="p">[</span><span class="n">outputfile</span><span class="p">]</span> <span class="o">=</span> <span class="n">rows</span>
+
+    <span class="c1"># Simulate uniqueness policy on fake table whereby on conflict/duplication - do nothing</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_load</span><span class="p">(</span><span class="n">sourcefile</span><span class="p">):</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">fake_storage</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sourcefile</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;url&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">url</span> <span class="ow">or</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">seen_urls</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">seen_urls</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+            <span class="n">fake_table</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;program&quot;</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;program&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;date_added&quot;</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;date_added&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span>
+                    <span class="s2">&quot;applicant_status&quot;</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;applicant_status&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;masters_or_phd&quot;</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;masters_or_phd&quot;</span><span class="p">),</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+
+    <span class="c1"># Mock database cursor object to represent a query pull</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">FakeCursor</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">table</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_result</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_query</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_result</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="p">)}</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">fetchone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_result</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="c1"># Mock database connection object</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">FakeConnection</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">table</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">cursor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">FakeCursor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="p">)</span>
+
+    <span class="c1"># mock a fake query to return a fake table</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">query_row_count</span><span class="p">():</span>
+        <span class="n">connection</span> <span class="o">=</span> <span class="n">FakeConnection</span><span class="p">(</span><span class="n">fake_table</span><span class="p">)</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT COUNT(*) AS count FROM applicantData;&quot;</span><span class="p">)</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">row</span> <span class="k">else</span> <span class="mi">0</span>
+
+    <span class="c1"># mock a finished subprocess</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">FakeDoneProcess</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">poll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="c1"># return fake done process</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_popen</span><span class="p">(</span><span class="n">_cmd</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">flask_app_module</span><span class="o">.</span><span class="n">run_pull_job</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">FakeDoneProcess</span><span class="p">()</span>
+
+    <span class="c1"># swap real scaper, save, load, subprocess with mock-ups</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="o">.</span><span class="n">sd</span><span class="p">,</span> <span class="s2">&quot;scrape_data&quot;</span><span class="p">,</span> <span class="n">fake_scrape_data</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="o">.</span><span class="n">sd</span><span class="p">,</span> <span class="s2">&quot;save_data&quot;</span><span class="p">,</span> <span class="n">fake_save_data</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="o">.</span><span class="n">ld</span><span class="p">,</span> <span class="s2">&quot;load&quot;</span><span class="p">,</span> <span class="n">fake_load</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="o">.</span><span class="n">subprocess</span><span class="p">,</span> <span class="s2">&quot;Popen&quot;</span><span class="p">,</span> <span class="n">fake_popen</span><span class="p">)</span>
+
+    <span class="c1"># run first pull request to test idempotency</span>
+    <span class="n">response_first</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/pull-data&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">response_first</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+    <span class="k">assert</span> <span class="n">query_row_count</span><span class="p">()</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">fake_rows</span><span class="p">)</span>
+
+    <span class="c1"># run second pull request which should not add duplicate rows (same row count, unique urls are same)</span>
+    <span class="n">response_second</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/pull-data&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">response_second</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+    <span class="k">assert</span> <span class="n">query_row_count</span><span class="p">()</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">fake_rows</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">seen_urls</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">fake_rows</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="test_simple_query_returns_dict_with_expected_schema_keys">
+<a class="viewcode-back" href="../api_tests.html#test_db_insert.test_simple_query_returns_dict_with_expected_schema_keys">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">db</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_simple_query_returns_dict_with_expected_schema_keys</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure a fetched row dictionary contains the expected schema key set.&quot;&quot;&quot;</span>
+    <span class="c1"># create a fake scraped input row</span>
+    <span class="n">fake_rows</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;program&quot;</span><span class="p">:</span> <span class="s2">&quot;Computer Science, Example University&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;masters_or_phd&quot;</span><span class="p">:</span> <span class="s2">&quot;PhD&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;comments&quot;</span><span class="p">:</span> <span class="s2">&quot;Row 1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;date_added&quot;</span><span class="p">:</span> <span class="s2">&quot;January 10, 2025&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://www.thegradcafe.com/result/query-1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;applicant_status&quot;</span><span class="p">:</span> <span class="s2">&quot;Accepted&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;status_date&quot;</span><span class="p">:</span> <span class="s2">&quot;10 Jan 2025&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;semester_year_start&quot;</span><span class="p">:</span> <span class="s2">&quot;Fall 2025&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;citizenship&quot;</span><span class="p">:</span> <span class="s2">&quot;International&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gpa&quot;</span><span class="p">:</span> <span class="s2">&quot;3.8&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gre&quot;</span><span class="p">:</span> <span class="s2">&quot;330&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gre_v&quot;</span><span class="p">:</span> <span class="s2">&quot;165&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;gre_aw&quot;</span><span class="p">:</span> <span class="s2">&quot;4.5&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;llm-generated-program&quot;</span><span class="p">:</span> <span class="s2">&quot;Computer Science&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;llm-generated-university&quot;</span><span class="p">:</span> <span class="s2">&quot;Example University&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+
+    <span class="n">fake_storage</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">fake_table</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># mock scraper to return fake rows</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_scrape_data</span><span class="p">(</span><span class="o">*</span><span class="n">_args</span><span class="p">,</span> <span class="o">**</span><span class="n">_kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">fake_rows</span>
+
+    <span class="c1"># mock save by storing fake rows in fake storage</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_save_data</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">outputfile</span><span class="p">):</span>
+        <span class="n">fake_storage</span><span class="p">[</span><span class="n">outputfile</span><span class="p">]</span> <span class="o">=</span> <span class="n">rows</span>
+
+    <span class="c1"># Mock load_data.load() writing rows from fake storage into fake table</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_load</span><span class="p">(</span><span class="n">sourcefile</span><span class="p">):</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">fake_storage</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sourcefile</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">fake_table</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;p_id&quot;</span><span class="p">:</span> <span class="n">idx</span><span class="p">,</span>
+                    <span class="s2">&quot;program&quot;</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;program&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;comments&quot;</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;comments&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;date_added&quot;</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;date_added&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;url&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;applicant_status&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;term&quot;</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;semester_year_start&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;us_or_international&quot;</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;citizenship&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;gpa&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gpa&quot;</span><span class="p">))</span> <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gpa&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s2">&quot;gre&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gre&quot;</span><span class="p">))</span> <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gre&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s2">&quot;gre_v&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gre_v&quot;</span><span class="p">))</span> <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gre_v&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s2">&quot;gre_aw&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gre_aw&quot;</span><span class="p">))</span> <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;gre_aw&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s2">&quot;degree&quot;</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;masters_or_phd&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;llm_generated_program&quot;</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;llm-generated-program&quot;</span><span class="p">),</span>
+                    <span class="s2">&quot;llm_generated_university&quot;</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;llm-generated-university&quot;</span><span class="p">),</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+
+    <span class="c1"># Mock database cursor object to represent a query pull</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">FakeCursor</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">table</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_result</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_query</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">fetchone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_result</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="c1"># Mock database connection object</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">FakeConnection</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">table</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">cursor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">FakeCursor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="p">)</span>
+
+    <span class="c1"># simulate pulling first row from mocked database as a dictionary</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">simple_query_first_row</span><span class="p">():</span>
+        <span class="n">connection</span> <span class="o">=</span> <span class="n">FakeConnection</span><span class="p">(</span><span class="n">fake_table</span><span class="p">)</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM applicantData ORDER BY p_id LIMIT 1;&quot;</span><span class="p">)</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">row</span> <span class="k">if</span> <span class="n">row</span> <span class="k">else</span> <span class="p">{}</span>
+
+    <span class="c1"># mock a finished subprocess</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">FakeDoneProcess</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">poll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="c1"># return fake done process</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fake_popen</span><span class="p">(</span><span class="n">_cmd</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">flask_app_module</span><span class="o">.</span><span class="n">run_pull_job</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">FakeDoneProcess</span><span class="p">()</span>
+
+    <span class="c1"># swap real scaper, save, load subprocess with mock-ups</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="o">.</span><span class="n">sd</span><span class="p">,</span> <span class="s2">&quot;scrape_data&quot;</span><span class="p">,</span> <span class="n">fake_scrape_data</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="o">.</span><span class="n">sd</span><span class="p">,</span> <span class="s2">&quot;save_data&quot;</span><span class="p">,</span> <span class="n">fake_save_data</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="o">.</span><span class="n">ld</span><span class="p">,</span> <span class="s2">&quot;load&quot;</span><span class="p">,</span> <span class="n">fake_load</span><span class="p">)</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">flask_app_module</span><span class="o">.</span><span class="n">subprocess</span><span class="p">,</span> <span class="s2">&quot;Popen&quot;</span><span class="p">,</span> <span class="n">fake_popen</span><span class="p">)</span>
+
+    <span class="c1"># call POST to endpoint with mocked pipeline</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/pull-data&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+
+    <span class="n">row_dict</span> <span class="o">=</span> <span class="n">simple_query_first_row</span><span class="p">()</span> <span class="c1"># pull one row</span>
+    <span class="c1"># declare expected schema keys</span>
+    <span class="n">expected_keys</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;p_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;program&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;comments&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;date_added&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;url&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;status&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;term&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;us_or_international&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gpa&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gre&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gre_v&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gre_aw&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;degree&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;llm_generated_program&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;llm_generated_university&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="c1"># test if the keys from the row are the same was what is expected per the schema</span>
+    <span class="k">assert</span> <span class="nb">set</span><span class="p">(</span><span class="n">row_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">==</span> <span class="n">expected_keys</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Neil Fernandez.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

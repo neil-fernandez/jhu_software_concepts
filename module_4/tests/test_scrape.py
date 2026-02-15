@@ -1,3 +1,5 @@
+"""Integration tests for scraping URL normalization, filtering, and persistence."""
+
 import io
 import builtins
 
@@ -8,6 +10,7 @@ import scrape as scrape_module
 
 @pytest.mark.integration
 def test_normalise_url_handles_empty_and_trailing_slash():
+    """Ensure URL normalization handles empty input and strips trailing slashes."""
     # test normalise_url returns None for empty values and strips trailing slashes
     assert scrape_module.normalise_url(None) is None
     assert scrape_module.normalise_url("") is None
@@ -16,6 +19,7 @@ def test_normalise_url_handles_empty_and_trailing_slash():
 
 @pytest.mark.integration
 def test_get_existing_urls_normalises_and_filters(monkeypatch):
+    """Ensure existing URL retrieval filters null/empty values and normalizes output."""
     # test get_existing_urls normalises urls and skips null/empty values
     class FakeCursor:
         def execute(self, _query):
@@ -54,6 +58,7 @@ def test_get_existing_urls_normalises_and_filters(monkeypatch):
 
 @pytest.mark.integration
 def test_scrape_data_filters_seen_urls_and_decodes(monkeypatch):
+    """Ensure scraping skips seen URLs and handles decode fallback behavior."""
     # test scrape_data decodes latin-1 fallback and skips seen urls
     class FakeResponse:
         def __init__(self, data):
@@ -85,6 +90,7 @@ def test_scrape_data_filters_seen_urls_and_decodes(monkeypatch):
 
 @pytest.mark.integration
 def test_save_data_writes_json_and_prints(monkeypatch, capsys):
+    """Ensure saving rows writes JSON and reports saved row count."""
     # test save_data writes json and prints saved count
     buffer = io.StringIO()
 
@@ -100,6 +106,7 @@ def test_save_data_writes_json_and_prints(monkeypatch, capsys):
 
 @pytest.mark.integration
 def test_save_data_handles_empty_rows(monkeypatch, capsys):
+    """Ensure saving empty rows reports zero saved records."""
     # test save_data handles empty rows and prints zero count
     buffer = io.StringIO()
 
