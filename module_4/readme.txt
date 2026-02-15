@@ -1,67 +1,72 @@
 Name: Neil Fernandez (nfernan8)
 
-Module Info: Module 4 Assignment: Database Queries is Due on
-             15/02/2026 23:59:00 EST.
+Module Info: Module 4 Assignment: Database Queries
 
 Approach:
-    I set up my virtual environment in venv with the dependencies using python 3.14.
+    I set up my environment in module_4/venv using Python 3.14 and installed all dependencies
+    from requirements.txt.
 
-    I started by building out my load_data.py module to take the cleaned llm data input and load it into
-    my postgresql database. I used the assignment schema and included handlers for the data types.
+    I wrote a range of unit tests per the assignment requirements and an integration test which
+    I continuously tested using pytest. I added pytest markers to all of my tests and checked
+    the Policy that no test should be unmarked using pytest -m "web or buttons or analysis or db or integration".
+    I then used use pytest-cov to guarantee 100% coverage of all code and if not covered I created
+    unit tests to close the gap and produce a coverage summary.
 
-    I then built out query_data to implement the query requirements from the assignment. I tested the output
-    multiple times to ensure it was calculating correctly. I also implemented my own queries.
+    I created a simple CI pipeline using GitHub actions and tested it sucessfully putting the result
+    in actions_success.png. My workflow file was stored in test.yml
 
-    I then built out my flask app in app.py. I brought across my work from module 2 in clean.py and scrape.py
-    to address part A and part B of the flask webpage part of the assignment. I styled my site per the
-    assignment instructions. I then implemented the buttons which made use of my clean, scrape, load and query
-    modules. I used some javascript to prevent users from updating analysis while pulling data.
-
-    In the final product, the app was tested and run by directly executing app.py
+    I also generated Sphinx documentation for setup, architecture, API references, testing guide,
+    and operational notes, with HTML build/publish configuration for GitHub and Read the Docs.
 
 Instructions:
-1. Clone the Github repo
-   git clone git@github.com:neil-fernandez/jhu_software_concepts.git cd jhu_software_concepts
+1. Clone the GitHub repo
+   git clone git@github.com:neil-fernandez/jhu_software_concepts.git
+   cd jhu_software_concepts/module_4
 
-2. Create a virtual environment for the dependencies from requirements.txt
+2. Create a virtual environment
    python -m venv venv
 
-3. Activate virtual environment
-   .\venv\Scripts\activate
+3. Activate virtual environment (PowerShell)
+   .\venv\Scripts\Activate.ps1
 
-4. Install the dependencies
-   python -m pip install requirements.txt
+4. Install dependencies
+   python -m pip install --upgrade pip
+   pip install -r requirements.txt
 
-5. Run main application *************
-   python app.py **************
+5. Set database environment variable (recommended)
+   $env:DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:5432/studentCourses"
+
+6. Run tests
+   pytest
+
+7. Run main application
+   cd src
+   python app.py
+
+8. Build Sphinx docs HTML
+   cd ..
+   sphinx-build -b html docs/source docs/_build/html
 
 Project Files and Descriptions:
-   app.py - starts the flask app to load the llm output into the database and display query results in index.html
-   load_data.py - contains functions to load a json file into the database schema (load),
-                  clean null bytes (clean_text), and parse floats to enable load using the correct
-                  data type (parse_number).
-   query_data.py - contains declarations for all the sql queries, the structured output to render on the website
-                   and to output to console, and it contains a main declaration to run the script directly for
-                   testing purposes.
-   scrape.py - contains functions to respectively perform web scraping of student data (scrape_data),
-               compare the scraped data against a normalised list of urls from the existing applicant database
-               (get_existing_urls and normalise_url), and save the new cleaned records in JSON format and back
-               to the database (save_data).
-   clean.py - contains functions clean_data which is used to clean scraped data using regex, beautifulsoup and
-              string expressions.
+   src/app.py - starts the Flask app, wires routes, manages busy-state, and renders SQL analysis output.
+   src/load_data.py - loads JSON data into PostgreSQL, cleans text/numbers, creates schema/index,
+                      and applies URL-based dedupe on insert.
+   src/query_data.py - defines SQL query statements and labels used for analysis rendering.
+   src/scrape.py - scrapes Grad Cafe rows, compares against existing URLs, and saves new cleaned records.
+   src/clean.py - normalizes and cleans scraped input fields.
 
-   llm_extend_applicant_data.json - contains a copy of the cleaned LLM JSON output per assignment instructions.
-   new_only.json - contains a copy of the newly scraped/cleaned data from grad cafe.
+   src/llm_extend_applicant_data.json - initial cleaned LLM dataset used for base load.
+   src/new_only.json - new scraped/cleaned records staged for load.
 
-   base.html - is the main layout parent template for the web application with head and body.
-   index.html - is the rendered html template which contains the user instructions, query output, and
-                buttons to pull more scraped/cleaned data loaded into the database and to update analysis
-                for the database queries.
-   main.css - contains all the website styling used.
+   src/templates/base.html - base layout template.
+   src/templates/index.html - analysis page with query output and control buttons.
+   src/static/main.css - stylesheet for app UI.
 
-   requirements.txt - contains all the dependencies to reconstruct the environment with dependencies for app.py
-                      in venv using Python 3.14.
+   tests/ - pytest suite for web routes, buttons, DB behavior, formatting, and end-to-end flows.
+   docs/source/ - Sphinx documentation source files.
+   .readthedocs.yaml - Read the Docs build configuration.
+   requirements.txt - project dependencies for app, tests, and docs.
 
-Known Bugs: N/A. There are no known bugs.
+Known Bugs: N/A. There are no known bugs at this time.
 
 Citations: N/A.

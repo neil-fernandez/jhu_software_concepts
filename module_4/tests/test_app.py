@@ -110,6 +110,24 @@ def test_get_db_connection_uses_database_url(monkeypatch):
 
 
 @pytest.mark.integration
+def test_get_db_connection_uses_database_url_conninfo(monkeypatch):
+    # test get_db_connection uses conninfo path when connect has no positional value arg
+    captured = {}
+
+    def fake_connect(**kwargs):
+        captured["kwargs"] = kwargs
+        return "connection"
+
+    monkeypatch.setenv("DATABASE_URL", "postgresql://example/testdb")
+    monkeypatch.setattr(flask_app_module.psycopg, "connect", fake_connect)
+
+    conn = flask_app_module.get_db_connection()
+
+    assert conn == "connection"
+    assert captured["kwargs"] == {"conninfo": "postgresql://example/testdb"}
+
+
+@pytest.mark.integration
 def test_get_db_connection_uses_default(monkeypatch):
     # test get_db_connection falls back to default connection settings
     captured = {}
