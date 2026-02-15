@@ -56,7 +56,7 @@ def perform_update_analysis():
 def get_db_connection():
     db_url = os.getenv("DATABASE_URL")
     if db_url:
-        return psycopg.connect(db_url)
+        return psycopg.connect(conninfo=db_url)
     return psycopg.connect(
         dbname="studentCourses",
         user="postgres",
@@ -72,7 +72,13 @@ def index():
     # open connection, get all the query results and pass the results and flashed status message variables
     # get the latest query only if the skip query flag is not set
     # LAST_RESULTS keeps a cache of the previous query to avoid a blank page
-    if not skip_queries or not LAST_RESULTS:
+    if skip_queries:
+        if LAST_RESULTS:
+            results = LAST_RESULTS
+        else:
+            # Preserve page structure without hitting the database.
+            results = [(label, prefix, None) for label, prefix, _query in qd.QUERIES]
+    elif not LAST_RESULTS:
         with get_db_connection() as connection:
             with connection.cursor() as cur:
                 for label, prefix, query in qd.QUERIES:
