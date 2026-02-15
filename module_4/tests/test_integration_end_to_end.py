@@ -6,7 +6,7 @@ import app as flask_app_module
 
 @pytest.fixture()
 def app():
-    flask_app = flask_app_module.app
+    flask_app = flask_app_module.create_app()
     flask_app.config["TESTING"] = True
     flask_app_module.PULL_DATA_PROCESS = None
     flask_app_module.LAST_RESULTS = []
@@ -175,3 +175,116 @@ def test_end_to_end_pull_update_render_flow(client, monkeypatch):
     assert any("Answer: Acceptance percent: 25.00" in item for item in items)
     assert any("Answer: Percent of rejected international engineering applicants for Fall 2026: 12.34" in item for item in items)
     assert any("Answer: GPA: 3.85, GRE: 327.50, GRE V: 163.50, GRE AW: 4.25" in item for item in items)
+
+
+@pytest.mark.integration
+def test_multiple_pull_data_requests_dedupe_by_url(client, monkeypatch):
+    # test POST /pull-data called twice with overlapping data enforces url uniqueness
+    # create two pulls with overlapping data
+    first_rows = [
+        {
+            "program": "Computer Science, Example University",
+            "masters_or_phd": "PhD",
+            "comments": "Row 1",
+            "date_added": "January 10, 2025",
+            "url": "https://www.thegradcafe.com/result/e2e-overlap-1",
+            "applicant_status": "Accepted",
+            "status_date": "10 Jan 2025",
+            "semester_year_start": "Fall 2026",
+            "citizenship": "International",
+            "gpa": "3.90",
+            "gre": "330",
+            "gre_v": "165",
+            "gre_aw": "4.5",
+            "llm-generated-program": "Computer Science",
+            "llm-generated-university": "Example University",
+        },
+        {
+            "program": "Data Science, Another University",
+            "masters_or_phd": "Masters",
+            "comments": "Row 2",
+            "date_added": "February 2, 2025",
+            "url": "https://www.thegradcafe.com/result/e2e-overlap-2",
+            "applicant_status": "Interview",
+            "status_date": "2 Feb 2025",
+            "semester_year_start": "Fall 2026",
+            "citizenship": "American",
+            "gpa": "3.80",
+            "gre": "325",
+            "gre_v": "162",
+            "gre_aw": "4.0",
+            "llm-generated-program": "Data Science",
+            "llm-generated-university": "Another University",
+        },
+    ]
+    second_rows = [
+        dict(first_rows[0]),
+        {
+            "program": "Mathematics, Third University",
+            "masters_or_phd": "PhD",
+            "comments": "Row 3",
+            "date_added": "March 5, 2025",
+            "url": "https://www.thegradcafe.com/result/e2e-overlap-3",
+            "applicant_status": "Accepted",
+            "status_date": "5 Mar 2025",
+            "semester_year_start": "Fall 2026",
+            "citizenship": "International",
+            "gpa": "3.95",
+            "gre": "334",
+            "gre_v": "167",
+            "gre_aw": "4.5",
+            "llm-generated-program": "Mathematics",
+            "llm-generated-university": "Third University",
+        },
+    ]
+
+    fake_storage = {}
+    fake_table = []
+
+    # mock scraper to return first rows, then overlapping rows
+    call_state = {"count": 0}
+
+    def fake_scrape_data(*_args, **_kwargs):
+        call_state["count"] += 1
+        if call_state["count"] == 1:
+            return first_rows
+        return second_rows
+
+    # mock save data to store fake rows in fake storage
+    def fake_save_data(rows, outputfile):
+        fake_storage[outputfile] = rows
+
+    # mock database load reading from fake storage and enforcing uniqueness by url
+    def fake_load(sourcefile):
+        rows = fake_storage.get(sourcefile, [])
+        existing_urls = {row["url"] for row in fake_table}
+        for row in rows:
+            if row["url"] not in existing_urls:
+                fake_table.append(dict(row))
+                existing_urls.add(row["url"])
+
+    # mock completed subprocess
+    class FakeDoneProcess:
+        def poll(self):
+            return 0
+
+    # return fake done process
+    def fake_popen(_cmd, cwd=None):
+        flask_app_module.run_pull_job()
+        return FakeDoneProcess()
+
+    # replace real scraper, save, load, subprocess with mock-ups
+    monkeypatch.setattr(flask_app_module.sd, "scrape_data", fake_scrape_data)
+    monkeypatch.setattr(flask_app_module.sd, "save_data", fake_save_data)
+    monkeypatch.setattr(flask_app_module.ld, "load", fake_load)
+    monkeypatch.setattr(flask_app_module.subprocess, "Popen", fake_popen)
+
+    # first pull inserts two rows
+    response_first = client.post("/pull-data")
+    assert response_first.status_code == 200
+    assert len(fake_table) == 2
+
+    # second pull overlaps one row, should insert only one new row by url uniqueness policy
+    response_second = client.post("/pull-data")
+    assert response_second.status_code == 200
+    assert len(fake_table) == 3

@@ -15,12 +15,12 @@
         <div class="nav-actions">
             <!--Pull data-->
             <form action="{{ url_for('pull_data') }}" method="post" id="pull-data-form">
-                <button class="nav-button" type="submit" id="pull-data-button"
+                <button class="nav-button" type="submit" id="pull-data-button" data-testid="pull-data-btn"
                     title="Fetches new Grad Cafe entries and loads them into the database.">Pull Data</button>
             </form>
             <!--Update analysis-->
             <form action="{{ url_for('update_analysis') }}" method="post" id="update-analysis-form">
-                <button class="nav-button" type="submit" id="update-analysis-button"
+                <button class="nav-button" type="submit" id="update-analysis-button" data-testid="update-analysis-btn"
                     title="Refreshes the analysis with the latest data.">Update Analysis</button>
             </form>
         </div>

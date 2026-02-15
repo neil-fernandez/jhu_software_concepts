@@ -7,7 +7,7 @@ import app as flask_app_module  # load app for testing Flask app object
 
 @pytest.fixture()
 def app():
-    flask_app = flask_app_module.app  # get the Flask app instance
+    flask_app = flask_app_module.create_app()  # get the Flask app instance
     flask_app.config["TESTING"] = True  # enable test mode
     flask_app.config["LIVESERVER_PORT"] = 8080
     flask_app.config["LIVESERVER_TIMEOUT"] = 10
@@ -62,6 +62,8 @@ def test_get_analysis_contains_page_buttons(client):
     assert pull_btn is not None
     assert update_btn is not None
 
+    assert pull_btn.get("data-testid") == "pull-data-btn"
+    assert update_btn.get("data-testid") == "update-analysis-btn"
     assert pull_btn.get_text(strip=True) == "Pull Data"
     assert update_btn.get_text(strip=True) == "Update Analysis"
 

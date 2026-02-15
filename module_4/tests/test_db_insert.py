@@ -5,7 +5,7 @@ import app as flask_app_module
 
 @pytest.fixture()
 def app():
-    flask_app = flask_app_module.app
+    flask_app = flask_app_module.create_app()
     flask_app.config["TESTING"] = True
     flask_app_module.PULL_DATA_PROCESS = None
     yield flask_app

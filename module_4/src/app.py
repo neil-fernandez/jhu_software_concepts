@@ -10,17 +10,16 @@ import query_data as qd
 import scrape as sd
 import subprocess
 import sys
+import os
 
 import psycopg
 
 from flask import Flask, render_template, get_flashed_messages, request, jsonify
-
-app = Flask(__name__)   # Create Flask app instance
-app.secret_key = "dev"  # secret key to flash message
 LAST_RESULTS = []
 PULL_DATA_PROCESS = None
 
 
+# check if pull data subprocess is running
 def pull_data_busy():
     global PULL_DATA_PROCESS
     if PULL_DATA_PROCESS is None:
@@ -30,14 +29,14 @@ def pull_data_busy():
     PULL_DATA_PROCESS = None
     return False
 
-
+# start new background process to run pull job
 def start_pull_worker():
     global PULL_DATA_PROCESS
     PULL_DATA_PROCESS = subprocess.Popen(
         [sys.executable, __file__, "--run-pull-job"],
     )
 
-
+# run pull data, calling scrape, save and looad
 def run_pull_job():
     rows = sd.scrape_data(
         "https://www.thegradcafe.com/survey/",
@@ -47,15 +46,23 @@ def run_pull_job():
     sd.save_data(rows, new_cleaned_file)
     ld.load(new_cleaned_file)
 
-
+# clear cached results allowing for next request to re-run queries
 def perform_update_analysis():
     global LAST_RESULTS
     # Force next /analysis load to execute fresh queries.
     LAST_RESULTS = []
 
+# return postgresql connection
+def get_db_connection():
+    db_url = os.getenv("DATABASE_URL")
+    if db_url:
+        return psycopg.connect(db_url)
+    return psycopg.connect(
+        dbname="studentCourses",
+        user="postgres",
+    )
+
 # Connect URL route '/' to index.html
-@app.route('/')
-@app.route('/analysis')
 def index():
     global LAST_RESULTS
     skip_queries = request.args.get("skip_queries") == "1"
@@ -66,10 +73,7 @@ def index():
     # get the latest query only if the skip query flag is not set
     # LAST_RESULTS keeps a cache of the previous query to avoid a blank page
     if not skip_queries or not LAST_RESULTS:
-        with psycopg.connect(
-                dbname="studentCourses",
-                user="postgres",
-        ) as connection:
+        with get_db_connection() as connection:
             with connection.cursor() as cur:
                 for label, prefix, query in qd.QUERIES:
                     cur.execute(query)
@@ -94,7 +98,6 @@ def index():
 
 
 # Connect URL route 'pull-data' to scrape, clean, save to json and load any new records into database
-@app.post('/pull-data')
 def pull_data():
     if pull_data_busy():
         return jsonify({"ok": False, "busy": True}), 409
@@ -102,12 +105,28 @@ def pull_data():
     return jsonify({"ok": True, "busy": False}), 200
 
 
-@app.post('/update-analysis')
 def update_analysis():
     if pull_data_busy():
         return jsonify({"ok": False, "busy": True}), 409
     perform_update_analysis()
     return jsonify({"ok": True, "busy": False}), 200
+
+# set up Flask app using application factory pattern
+def register_routes(flask_app):
+    flask_app.add_url_rule("/", endpoint="index", view_func=index, methods=["GET"])
+    flask_app.add_url_rule("/analysis", endpoint="analysis", view_func=index, methods=["GET"])
+    flask_app.add_url_rule("/pull-data", endpoint="pull_data", view_func=pull_data, methods=["POST"])
+    flask_app.add_url_rule("/update-analysis", endpoint="update_analysis", view_func=update_analysis, methods=["POST"])
+
+# build new Flask app
+def create_app():
+    flask_app = Flask(__name__)
+    flask_app.secret_key = "dev"
+    register_routes(flask_app)
+    return flask_app
+
+# keep existing global app for normal runtime; tests can call create_app() for fresh instance
+app = create_app()
 
 
 if __name__ == "__main__":
