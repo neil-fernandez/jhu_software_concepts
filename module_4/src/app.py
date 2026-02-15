@@ -11,6 +11,7 @@ import scrape as sd
 import subprocess
 import sys
 import os
+import inspect
 
 import psycopg
 
@@ -56,6 +57,9 @@ def perform_update_analysis():
 def get_db_connection():
     db_url = os.getenv("DATABASE_URL")
     if db_url:
+        connect_signature = inspect.signature(psycopg.connect)
+        if "value" in connect_signature.parameters:
+            return psycopg.connect(db_url)
         return psycopg.connect(conninfo=db_url)
     return psycopg.connect(
         dbname="studentCourses",
@@ -67,7 +71,7 @@ def index():
     global LAST_RESULTS
     skip_queries = request.args.get("skip_queries") == "1"
     messages = get_flashed_messages()
-    results = []    # set up empty list to store query results
+    results = LAST_RESULTS
 
     # open connection, get all the query results and pass the results and flashed status message variables
     # get the latest query only if the skip query flag is not set
@@ -93,8 +97,6 @@ def index():
                     #print result to console
                     print(f"{label}: {prefix}{value if row else None}")
         LAST_RESULTS = results  # cache query results
-    else:
-        results = LAST_RESULTS
     return render_template(
         'index.html',
         results=results,
